@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f5fa;
+        --surface: #ffffff;
+        --surface-soft: #faf9ff;
+        --ink: #171525;
+        --ink-2: #56536a;
+        --ink-3: #918da3;
+        --line: #e9e7f0;
+        --line-strong: #ddd9e8;
+        --purple: #6d3eea;
+        --purple-dark: #5226c8;
+        --purple-soft: #eee9ff;
+        --green: #12a875;
+        --green-soft: #e7f8f1;
+        --amber: #b7791f;
+        --amber-soft: #fff8e6;
+        --red: #d64a55;
+        --red-soft: #fff0f1;
+        --shadow: 0 12px 30px rgba(30, 20, 60, 0.10), 0 2px 8px rgba(30, 20, 60, 0.06);
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        width: 372px;
+        max-height: 600px;
+        margin: 0;
+        overflow-y: auto;
+        background: var(--bg);
+        color: var(--ink);
+        font: 13px/1.4 Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button, input, select { font: inherit; }
+      button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
+        outline: 3px solid rgba(109, 62, 234, 0.25);
+        outline-offset: 2px;
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        padding: 18px 18px 42px;
+        color: #fff;
+        background:
+          radial-gradient(circle at 88% 5%, rgba(255,255,255,.18), transparent 30%),
+          linear-gradient(135deg, #261551 0%, #5730c9 58%, #8158ed 100%);
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        right: -70px;
+        bottom: -100px;
+        border: 24px solid rgba(255,255,255,.07);
+        border-radius: 50%;
+      }
+
+      .brand { position: relative; z-index: 1; display: flex; align-items: center; gap: 11px; }
+      .brand-mark {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(255,255,255,.28);
+        border-radius: 12px;
+        background: rgba(255,255,255,.14);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+        backdrop-filter: blur(8px);
+      }
+      .brand-mark img { width: 25px; height: 25px; }
+      h1 { margin: 0; font-size: 16px; line-height: 1.15; letter-spacing: -0.02em; }
+      .tagline { margin-top: 3px; color: rgba(255,255,255,.72); font-size: 11px; }
+      .local-pill {
+        margin-left: auto;
+        padding: 5px 8px;
+        border: 1px solid rgba(255,255,255,.2);
+        border-radius: 999px;
+        background: rgba(255,255,255,.1);
+        color: rgba(255,255,255,.88);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+
+      main { position: relative; z-index: 2; margin-top: -28px; padding: 0 12px 14px; }
+      .card {
+        margin-bottom: 10px;
+        padding: 14px;
+        border: 1px solid rgba(224, 220, 234, .9);
+        border-radius: 16px;
+        background: var(--surface);
+        box-shadow: 0 2px 7px rgba(38, 21, 81, .04);
+      }
+      .overview { box-shadow: var(--shadow); }
+
+      .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+      .stat {
+        min-width: 0;
+        padding: 11px 12px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: linear-gradient(180deg, #fff, #fbfaff);
+      }
+      .stat-label {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--ink-3);
+        font-size: 9px;
+        font-weight: 750;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+      .stat-value { min-height: 21px; display: flex; align-items: center; color: var(--ink); font-size: 14px; font-weight: 700; }
+      .dot { width: 8px; height: 8px; flex: none; margin-right: 7px; border-radius: 50%; }
+      .dot.on { background: var(--green); box-shadow: 0 0 0 4px var(--green-soft); }
+      .dot.off { background: var(--ink-3); box-shadow: 0 0 0 4px #f0eef4; }
+      #mappings { font-size: 19px; letter-spacing: -0.03em; }
+
+      .button {
+        width: 100%;
+        min-height: 36px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 7px;
+        margin-top: 10px;
+        padding: 8px 12px;
+        border: 0;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 11px;
+        font-weight: 700;
+        transition: transform .1s ease, background .15s ease, color .15s ease, border-color .15s ease;
+      }
+      .button:active { transform: translateY(1px); }
+      .button-subtle { color: var(--ink-2); background: #f3f1f7; }
+      .button-subtle:hover { color: var(--ink); background: #ece9f2; }
+      .button-danger { color: var(--red); background: var(--red-soft); }
+      .button-danger:hover { background: #ffe5e8; }
+
+      .section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+      .section-title { margin: 0; font-size: 13px; line-height: 1.25; letter-spacing: -0.01em; }
+      .section-kicker { margin-top: 2px; color: var(--ink-3); font-size: 10px; }
+      .count {
+        min-width: 23px;
+        padding: 3px 7px;
+        border-radius: 999px;
+        background: var(--purple-soft);
+        color: var(--purple-dark);
+        font-size: 10px;
+        font-weight: 750;
+        text-align: center;
+      }
+
+      .accuracy-control {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 11px 12px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--surface-soft);
+        cursor: pointer;
+      }
+      .accuracy-copy { min-width: 0; flex: 1; }
+      .accuracy-name { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
+      .accuracy-desc { margin-top: 2px; color: var(--ink-2); font-size: 10px; }
+      .optional { padding: 2px 6px; border-radius: 999px; background: var(--purple-soft); color: var(--purple-dark); font-size: 8px; font-weight: 800; text-transform: uppercase; }
+
+      .switch { position: relative; width: 38px; height: 22px; flex: none; }
+      .switch input { position: absolute; opacity: 0; pointer-events: none; }
+      .track { position: absolute; inset: 0; border-radius: 999px; background: #d9d5e2; transition: background .18s ease; }
+      .track::after {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 3px;
+        left: 3px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(23, 21, 37, .2);
+        transition: transform .18s ease;
+      }
+      .switch input:checked + .track { background: var(--purple); }
+      .switch input:checked + .track::after { transform: translateX(16px); }
+      .switch input:focus-visible + .track { outline: 3px solid rgba(109, 62, 234, .25); outline-offset: 2px; }
+
+      .setup {
+        margin-top: 9px;
+        padding: 10px 11px;
+        border: 1px solid #f0d79e;
+        border-radius: 11px;
+        background: var(--amber-soft);
+        color: #744c14;
+        font-size: 10px;
+        line-height: 1.5;
+      }
+      .setup > div { margin-top: 4px; }
+      .setup code { padding: 2px 4px; border-radius: 4px; background: #f8e7bd; font-size: 9px; }
+      .setup a { color: #8b5c16; font-weight: 750; }
+
+      .empty {
+        padding: 14px 12px;
+        border: 1px dashed var(--line-strong);
+        border-radius: 11px;
+        background: #fbfafd;
+        color: var(--ink-3);
+        font-size: 10px;
+        text-align: center;
+      }
+      .hint { margin-top: 8px; color: var(--ink-2); font-size: 9.5px; line-height: 1.45; }
+      .muted { color: var(--ink-3); }
+      .manage-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 10px;
+        color: var(--purple-dark);
+        font-size: 10px;
+        font-weight: 750;
+        text-decoration: none;
+      }
+      .manage-link:hover { color: var(--purple); text-decoration: underline; }
+
+      .footer {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        padding: 4px 5px 2px;
+        color: var(--ink-2);
+        font-size: 9.5px;
+      }
+      .footer-shield { flex: none; color: var(--purple); font-size: 13px; }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="brand">
+        <div class="brand-mark"><img src="icons/icon32.png" alt="" /></div>
+        <div>
+          <h1>Local Redactor AI</h1>
+          <div class="tagline">Private by design. Local by default.</div>
+        </div>
+        <span class="local-pill">On device</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="card overview" aria-label="Protection status">
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">Local engine</span>
+            <span class="stat-value" id="backend"><span class="dot off"></span>Checking…</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Tab mappings</span>
+            <span class="stat-value" id="mappings">—</span>
+          </div>
+        </div>
+        <button class="button button-danger" id="clear" type="button">Clear this tab’s mappings</button>
+      </section>
+
+      <section class="card" id="licenseCard">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">License</h2>
+            <div class="section-kicker" id="licenseKicker">Checking…</div>
+          </div>
+        </div>
+        <div id="licenseActive" style="display:none">
+          <div style="display:flex;align-items:center;gap:7px;padding:10px 12px;border:1px solid #b8e6d4;border-radius:11px;background:var(--green-soft)">
+            <span style="color:var(--green);font-size:15px">✓</span>
+            <span style="font-size:11px;font-weight:700;color:#0e7d58" id="licenseLabel">Active</span>
+          </div>
+          <button class="button button-subtle" id="deactivateBtn" type="button" style="margin-top:8px;font-size:10px">Deactivate license</button>
+        </div>
+        <div id="licenseTrial" style="display:none">
+          <div style="padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:var(--surface-soft);font-size:11px">
+            <span id="trialMsg"></span>
+          </div>
+        </div>
+        <div id="licenseExpired" style="display:none">
+          <div style="padding:10px 12px;border:1px solid #f0a0a0;border-radius:11px;background:var(--red-soft);color:#943030;font-size:11px;font-weight:600">
+            Trial ended — enter a license key or buy one below.
+          </div>
+        </div>
+        <div id="licenseInput" style="display:none;margin-top:8px">
+          <input type="text" id="keyInput" placeholder="Paste license key…" style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:11px;background:var(--surface-soft)">
+          <div id="keyError" style="display:none;margin-top:4px;color:var(--red);font-size:10px"></div>
+          <button class="button button-subtle" id="activateBtn" type="button" style="margin-top:6px;background:var(--purple);color:#fff">Activate</button>
+          <a id="buyLink" class="button button-subtle" href="https://buy.stripe.com/4gM14gf5R06d0koehidIA02" target="_blank" rel="noopener" style="margin-top:4px;text-decoration:none;text-align:center">Buy a license →</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Detection accuracy</h2>
+            <div class="section-kicker">Choose speed or maximum recall</div>
+          </div>
+        </div>
+        <label class="accuracy-control" for="thorough">
+          <span class="accuracy-copy">
+            <span class="accuracy-name">Thorough check <span class="optional">Optional</span></span>
+            <span class="accuracy-desc">Uses a larger local model. Slower, but more cautious.</span>
+          </span>
+          <span class="switch"><input type="checkbox" id="thorough"><span class="track"></span></span>
+        </label>
+        <div id="thoroughSetup" class="setup" style="display:none">
+          <b>Install the extra model</b> (about 4&nbsp;GB, non-commercial licence).
+          <div>1. Install Ollama from <a id="ollamaLink" href="https://ollama.com/download" target="_blank" rel="noopener">ollama.com/download</a></div>
+          <div>2. Double-click <code>backend/install-thorough-model.command</code></div>
+          <div class="muted">Until then, Thorough falls back to the fast engine.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Saved rules</h2>
+            <div class="section-kicker">Always protect these terms</div>
+          </div>
+          <span id="ruleCount" class="count">0</span>
+        </div>
+        <div class="hint">Exact matches are case-insensitive. The local model also uses these terms as private examples.</div>
+        <a class="manage-link" href="rules.html#saved-rules" target="_blank" rel="noopener">Edit or remove saved rules <span aria-hidden="true">→</span></a>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Not-sensitive terms</h2>
+            <div class="section-kicker">Items the detector should skip</div>
+          </div>
+          <span id="ignoreCount" class="count">0</span>
+        </div>
+        <div class="hint">Terms you unticked during review are remembered here. Clear the list if detection becomes too relaxed.</div>
+        <a class="manage-link" href="rules.html#ignored-terms" target="_blank" rel="noopener">Edit or remove not-sensitive terms <span aria-hidden="true">→</span></a>
+      </section>
+
+      <div class="footer">
+        <span class="footer-shield">◆</span>
+        <span>Turn on <b>Protect</b> in ChatGPT or Claude. Messages are held for review and processed by your local engine.</span>
+      </div>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

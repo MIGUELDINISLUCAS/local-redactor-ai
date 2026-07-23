@@ -1,0 +1,18 @@
+<svg width="512" height="512" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#6d28d9"/>
+    </linearGradient>
+  </defs>
+  <!-- Padded group so the mark sits comfortably in the toolbar cell -->
+  <g transform="translate(15 15) scale(0.766)">
+    <path d="M64 10 L110 26 V62 C110 94 89 114 64 120 C39 114 18 94 18 62 V26 Z"
+          fill="url(#g)"/>
+    <path d="M50 62 V54 a14 14 0 0 1 28 0 V62"
+          fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+    <rect x="44" y="60" width="40" height="34" rx="7" fill="#ffffff"/>
+    <circle cx="64" cy="74" r="5" fill="#6d28d9"/>
+    <rect x="61.5" y="76" width="5" height="11" rx="2.5" fill="#6d28d9"/>
+  </g>
+</svg>

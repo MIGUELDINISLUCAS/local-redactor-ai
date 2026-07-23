@@ -1,0 +1,9 @@
+.claude/
+node_modules/
+dist/
+release/
+.env
+*.pem
+.DS_Store
+frontend/public/downloads/*.dmg
+frontend/public/downloads/*.exe

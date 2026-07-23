@@ -1,0 +1,48 @@
+{
+  "name": "local-redactor-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local Redactor AI — tray app that runs the backend engine",
+  "main": "main.cjs",
+  "scripts": {
+    "electron": "electron .",
+    "dev": "electron .",
+    "build": "npm run build --prefix ../backend && electron-builder",
+    "pack": "npm run build --prefix ../backend && electron-builder --dir"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "ai.localredactor.app",
+    "productName": "Local Redactor AI",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs"
+    ],
+    "extraResources": [
+      { "from": "../backend/dist", "to": "backend" },
+      { "from": "../backend/node_modules", "to": "backend/node_modules" },
+      { "from": "../backend/package.json", "to": "backend/package.json" },
+      { "from": "build/trayTemplate.png", "to": "trayTemplate.png" }
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [{ "target": "dmg", "arch": ["arm64"] }],
+      "hardenedRuntime": false,
+      "extendInfo": { "LSUIElement": true }
+    },
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }]
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "category": "Utility"
+    }
+  }
+}

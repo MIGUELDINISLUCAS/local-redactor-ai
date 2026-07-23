@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Manage privacy lists · Local Redactor AI</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f5fb;
+        --surface: #fff;
+        --ink: #171525;
+        --ink-2: #59556b;
+        --ink-3: #918da3;
+        --line: #e7e4ef;
+        --purple: #6d3eea;
+        --purple-dark: #5226c8;
+        --purple-soft: #eee9ff;
+        --green: #0e9b6d;
+        --red: #c8404c;
+        --red-soft: #fff0f1;
+        --shadow: 0 20px 50px rgba(38, 21, 81, .10), 0 2px 8px rgba(38, 21, 81, .05);
+      }
+      * { box-sizing: border-box; }
+      body {
+        min-width: 320px;
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font: 15px/1.45 Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      button, input, select { font: inherit; }
+      button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid rgba(109, 62, 234, .25); outline-offset: 2px; }
+      .hero { padding: 42px 24px 68px; color: #fff; background: radial-gradient(circle at 88% 5%, rgba(255,255,255,.18), transparent 27%), linear-gradient(135deg, #261551, #5730c9 58%, #8158ed); }
+      .hero-inner, main { width: min(880px, calc(100% - 40px)); margin: 0 auto; }
+      .brand { display: flex; align-items: center; gap: 14px; }
+      .brand-mark { width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.28); border-radius: 15px; background: rgba(255,255,255,.14); }
+      .brand-mark img { width: 31px; height: 31px; }
+      h1 { margin: 0; font-size: clamp(24px, 4vw, 32px); line-height: 1.1; letter-spacing: -.035em; }
+      .tagline { margin-top: 7px; color: rgba(255,255,255,.78); }
+      main { margin-top: -38px; padding-bottom: 48px; position: relative; }
+      .intro { margin-bottom: 16px; padding: 17px 19px; border: 1px solid rgba(255,255,255,.45); border-radius: 16px; background: rgba(255,255,255,.92); box-shadow: var(--shadow); color: var(--ink-2); }
+      .intro strong { color: var(--ink); }
+      .back { display: inline-flex; margin-bottom: 17px; color: #fff; font-size: 13px; font-weight: 700; text-decoration: none; }
+      .back:hover { text-decoration: underline; }
+      .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+      .card { padding: 20px; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); box-shadow: 0 3px 12px rgba(38,21,81,.045); }
+      .section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+      h2 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
+      .sub { margin-top: 4px; color: var(--ink-2); font-size: 13px; }
+      .count { min-width: 30px; padding: 4px 9px; border-radius: 999px; background: var(--purple-soft); color: var(--purple-dark); font-size: 12px; font-weight: 800; text-align: center; }
+      .list { display: flex; flex-direction: column; gap: 8px; }
+      .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 9px; border: 1px solid var(--line); border-radius: 11px; background: #fcfbff; }
+      .row.editing { grid-template-columns: minmax(0, 1fr); background: #faf8ff; border-color: #d9ceff; }
+      .term { min-width: 0; overflow: hidden; color: #38344b; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+      .meta { display: flex; align-items: center; gap: 7px; min-width: 0; margin-top: 4px; color: var(--ink-3); font-size: 11px; }
+      .badge { padding: 3px 7px; border-radius: 999px; background: #eeeaf5; color: #625d72; font-size: 10px; font-weight: 800; }
+      .actions { display: flex; gap: 5px; }
+      .icon, .button { border: 0; border-radius: 8px; cursor: pointer; font-weight: 750; }
+      .icon { width: 32px; height: 32px; color: var(--ink-2); background: #f1eff6; }
+      .icon:hover { background: var(--purple-soft); color: var(--purple-dark); }
+      .icon.danger:hover { background: var(--red-soft); color: var(--red); }
+      .form { display: grid; grid-template-columns: minmax(0, 1fr) 150px auto; gap: 8px; align-items: center; }
+      .form input, .form select { min-width: 0; width: 100%; padding: 8px 9px; border: 1px solid #d9d5e4; border-radius: 8px; background: #fff; color: var(--ink); }
+      .check { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-2); font-size: 12px; white-space: nowrap; }
+      .button { min-height: 35px; padding: 8px 12px; background: var(--purple); color: #fff; font-size: 12px; }
+      .button:hover { background: var(--purple-dark); }
+      .button.subtle { background: #f1eff6; color: var(--ink-2); }
+      .button.subtle:hover { background: #e8e4ef; color: var(--ink); }
+      .button.danger { background: var(--red-soft); color: var(--red); }
+      .button.danger:hover { background: #ffe2e5; }
+      .card-footer { display: flex; justify-content: flex-end; margin-top: 14px; }
+      .empty { padding: 19px 12px; border: 1px dashed #d8d3e2; border-radius: 11px; color: var(--ink-3); font-size: 13px; text-align: center; }
+      #notice { min-height: 20px; margin: 16px 2px 0; color: var(--red); font-size: 13px; }
+      @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } .hero { padding-top: 28px; } .hero-inner, main { width: min(100% - 24px, 560px); } }
+      @media (max-width: 480px) { .form { grid-template-columns: 1fr; } .check { margin: 2px 0; } }
+      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-inner">
+        <a class="back" href="popup.html">← Back to popup</a>
+        <div class="brand">
+          <div class="brand-mark"><img src="icons/icon32.png" alt="" /></div>
+          <div><h1>Manage privacy lists</h1><div class="tagline">Choose exactly what Local Redactor protects or skips.</div></div>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div class="intro"><strong>These lists stay on this device.</strong> Changes apply to new messages immediately.</div>
+      <div id="notice" role="status" aria-live="polite"></div>
+      <div class="grid">
+        <section class="card" id="saved-rules">
+          <div class="section-head"><div><h2>Saved rules</h2><div class="sub">Always protect these terms.</div></div><span id="savedCount" class="count">0</span></div>
+          <div id="savedList" class="list"></div>
+          <div id="savedEmpty" class="empty" hidden>No saved rules yet. Add one from the review screen.</div>
+          <div class="card-footer"><button id="clearSaved" class="button danger" type="button">Clear all saved rules</button></div>
+        </section>
+        <section class="card" id="ignored-terms">
+          <div class="section-head"><div><h2>Not-sensitive terms</h2><div class="sub">The detector will skip these terms.</div></div><span id="ignoredCount" class="count">0</span></div>
+          <div id="ignoredList" class="list"></div>
+          <div id="ignoredEmpty" class="empty" hidden>No ignored terms yet. Untick a detected item during review to add one.</div>
+          <div class="card-footer"><button id="clearIgnored" class="button danger" type="button">Clear not-sensitive list</button></div>
+        </section>
+      </div>
+    </main>
+    <script src="rules.js"></script>
+  </body>
+</html>

@@ -1,0 +1,118 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # Allow manual deployment
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/anondocs:latest
+            ${{ secrets.DOCKER_USERNAME }}/anondocs:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            # Create app directory if it doesn't exist
+            mkdir -p ~/anondocs
+            cd ~/anondocs
+            
+            # Download docker-compose.prod.yml from the repo
+            curl -o docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.prod.yml
+            
+            # Update the docker-compose.yml to use the new image with specific SHA
+            sed -i "s|\${DOCKER_USERNAME}/anondocs:latest|${{ secrets.DOCKER_USERNAME }}/anondocs:${{ github.sha }}|g" docker-compose.yml
+            
+            # Create production .env file
+            echo "PORT=3000" > .env
+            echo "NODE_ENV=production" >> .env
+            echo "DEFAULT_LLM_PROVIDER=openai" >> .env
+            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+            echo "OPENAI_MODEL=gpt-4o-mini" >> .env
+            echo "OPENAI_TEMPERATURE=0" >> .env
+            echo "CHUNK_SIZE=1500" >> .env
+            echo "CHUNK_OVERLAP=0" >> .env
+            echo "ENABLE_PARALLEL_CHUNKS=true" >> .env
+            
+            # Pull latest images
+            docker-compose pull anondocs-api
+            
+            # Stop existing containers gracefully
+            docker-compose down --timeout 30
+            
+            # Start containers
+            docker-compose up -d
+            
+            # Clean up old images (keep last 3 versions)
+            docker image prune -f
+            FORMAT='table {{.Repository}}:{{.Tag}}'
+            docker images ${{ secrets.DOCKER_USERNAME }}/anondocs --format "$FORMAT" | tail -n +4 | xargs -r docker rmi
+            
+            # Show running containers
+            docker-compose ps
+            
+            # Wait for container to start and health checks to initialize
+            sleep 60
+            
+            # Check if container is running (accept both healthy and starting states)
+            if docker-compose ps | grep -q "Up.*health:"; then
+              echo "✅ Deployment successful! Container is running with health check enabled."
+              echo "📋 Application status:"
+              docker-compose ps
+              echo "📋 Recent logs:"
+              docker-compose logs --tail=10
+            else
+              echo "❌ Deployment failed. Container logs:"
+              docker-compose logs --tail=50
+              exit 1
+            fi
+
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Deployment to VPS successful!"
+          else
+            echo "❌ Deployment to VPS failed!"
+            exit 1
+          fi
