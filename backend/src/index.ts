@@ -2,8 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { detectRouter } from './routes/detect';
-import { exportRouter } from './routes/export';
-import { providersRouter } from './routes/providers';
 import { warmUpNer } from './core/nerDetector';
 import { trialStatus } from './core/trial';
 import { accessGuard, fullStatus } from './core/license';
@@ -53,8 +51,8 @@ app.use((req, res, next) => {
 });
 
 // Allow the known local web-app origins and browser extensions (the
-// ChatGPT/Claude companion). We deliberately reject arbitrary websites since
-// /providers/complete can spend the user's API key.
+// ChatGPT/Claude companion). We deliberately reject arbitrary websites so a
+// random page can't reach the local anonymisation engine.
 app.use(
   cors({
     origin: (origin, cb) => {
@@ -77,8 +75,6 @@ app.get('/health', (_req, res) =>
 app.use('/api', accessGuard);
 
 app.use('/api', detectRouter);
-app.use('/api/export', exportRouter);
-app.use('/api/providers', providersRouter);
 
 // Desktop/production: serve the built React frontend from this same server so
 // the whole app lives on one local origin (no external hosting, no CORS).

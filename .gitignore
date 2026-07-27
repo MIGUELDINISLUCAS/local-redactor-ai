@@ -7,3 +7,7 @@ release/
 .DS_Store
 frontend/public/downloads/*.dmg
 frontend/public/downloads/*.exe
+
+# Local artifacts (not part of the repo)
+*.cer
+*.mp4
