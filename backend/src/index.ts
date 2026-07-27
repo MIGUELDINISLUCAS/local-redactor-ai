@@ -13,6 +13,15 @@ const app = express();
 const PORT = Number(process.env.PORT ?? 3001);
 const HOST = process.env.HOST ?? '127.0.0.1';
 
+// The published Chrome Web Store extension. LRA_EXTENSION_IDS extends this
+// list (comma-separated) for unpacked/beta installs whose IDs differ.
+const DEFAULT_EXTENSION_IDS = ['dppllhhednkmbcchgldbbnaedfaidgpj'];
+
+function allowedExtensionIds(): string[] {
+  const extra = (process.env.LRA_EXTENSION_IDS ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+  return [...DEFAULT_EXTENSION_IDS, ...extra];
+}
+
 function isAllowedOrigin(origin: string | undefined): boolean {
   if (!origin) return true; // curl/native clients do not send a browser Origin
   try {
@@ -20,11 +29,8 @@ function isAllowedOrigin(origin: string | undefined): boolean {
     if (url.protocol === 'http:' && (url.hostname === 'localhost' || url.hostname === '127.0.0.1')) {
       return url.port === String(PORT) || url.port === '5173';
     }
-    // Extension IDs vary for unpacked beta installs. Packaged releases should set
-    // LRA_EXTENSION_IDS to a comma-separated allow-list of their stable IDs.
     if (url.protocol === 'chrome-extension:' || url.protocol === 'moz-extension:') {
-      const allowed = (process.env.LRA_EXTENSION_IDS ?? '').split(',').map((s) => s.trim()).filter(Boolean);
-      return allowed.length === 0 || allowed.includes(url.hostname);
+      return allowedExtensionIds().includes(url.hostname);
     }
   } catch {
     return false;
@@ -32,14 +38,29 @@ function isAllowedOrigin(origin: string | undefined): boolean {
   return false;
 }
 
+// DNS-rebinding guard: a malicious site can point its own domain at 127.0.0.1
+// and reach this server as a "same-origin" request that CORS never sees. Such
+// requests still carry the attacker's domain in the Host header — reject any
+// Host that isn't a local one.
+app.use((req, res, next) => {
+  const host = (req.headers.host ?? '').toLowerCase();
+  const hostname = host.replace(/:\d+$/, '');
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]') {
+    next();
+    return;
+  }
+  res.status(403).json({ error: 'forbidden-host' });
+});
+
 // Allow the known local web-app origins and browser extensions (the
 // ChatGPT/Claude companion). We deliberately reject arbitrary websites since
 // /providers/complete can spend the user's API key.
 app.use(
   cors({
     origin: (origin, cb) => {
-      if (isAllowedOrigin(origin)) cb(null, true);
-      else cb(new Error('Origin not allowed'));
+      // Disallowed origins get no CORS headers (browser blocks the response)
+      // rather than an error, which would 500 with a stack trace.
+      cb(null, isAllowedOrigin(origin));
     },
   })
 );
