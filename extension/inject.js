@@ -79,7 +79,9 @@
   // copy of your original text and ships it separately. We still block these
   // (the title is stored server-side), but quietly — no scary warning.
   function isExpectedBlockUrl(url) {
-    return /\/(gen_title|title|rename)\b/.test(url || '');
+    return /\/(gen_title|title|rename)\b/.test(url || '')
+      || /\/backend-api\/(files|global\/search)\b/.test(url || '')
+      || /\/realtime\//.test(url || '');
   }
 
   function reportLeakBlocked(reason, detail) {
@@ -396,7 +398,8 @@
     }
 
     // Block raw file uploads (native "+" attach) — we can't scan a binary body.
-    if (protectOn && isPost) {
+    // Skip realtime/streaming endpoints — their binary frames aren't file uploads.
+    if (protectOn && isPost && !/\/realtime\//.test(url)) {
       const body = init && init.body;
       let fileUpload = isFileLikeBody(body);
       if (!fileUpload && reqObj) {
@@ -404,7 +407,7 @@
       }
       if (fileUpload) {
         reportLeakBlocked('attachment', { url, value: '(file attachment)' });
-        throw new DOMException('Blocked: file upload while Protect on', 'AbortError');
+        return Response.error();
       }
     }
 
