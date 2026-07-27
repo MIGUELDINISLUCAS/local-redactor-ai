@@ -21,8 +21,11 @@ const steps = [
   { number: '03', icon: 'restore' as IconName, title: 'Restore locally', copy: 'The reply comes back with your original details restored on your device.' },
 ];
 const CHROME_STORE_URL = 'https://chromewebstore.google.com/detail/local-redactor-ai-%E2%80%94-priva/dppllhhednkmbcchgldbbnaedfaidgpj';
-const MAC_DMG = 'https://github.com/MIGUELDINISLUCAS/local-redactor-ai/releases/latest/download/Local.Redactor.AI-0.1.0-arm64.dmg';
-const WIN_EXE = 'https://github.com/MIGUELDINISLUCAS/local-redactor-ai/releases/latest/download/Local.Redactor.AI.Setup.0.1.0.exe';
+// Version-less "latest" URL — the release artifact keeps a stable name
+// (see desktop build.dmg.artifactName), so this never needs updating per release.
+const MAC_DMG = 'https://github.com/MIGUELDINISLUCAS/local-redactor-ai/releases/latest/download/Local.Redactor.AI-arm64.dmg';
+// Windows is pinned to the last release that shipped an .exe (v0.1.1+ is macOS-only for now).
+const WIN_EXE = 'https://github.com/MIGUELDINISLUCAS/local-redactor-ai/releases/download/v0.1.0/Local.Redactor.AI.Setup.0.1.0.exe';
 
 export default function LandingPage() {
   return (
@@ -138,7 +141,7 @@ export default function LandingPage() {
               <h3>Desktop app</h3>
               <p>Install once and it runs quietly in the background. Keeps your data private on your machine.</p>
               <div className="download-links">
-                <a className="download-btn" href={MAC_DMG}>Mac (Apple Silicon) <small>.dmg · 303 MB</small></a>
+                <a className="download-btn" href={MAC_DMG}>Mac (Apple Silicon) <small>.dmg · 299 MB</small></a>
                 <a className="download-btn" href={WIN_EXE}>Windows <small>.exe · 231 MB</small></a>
               </div>
               <p className="download-note">Windows: if SmartScreen says "Windows protected your PC", click More info → Run anyway.</p>

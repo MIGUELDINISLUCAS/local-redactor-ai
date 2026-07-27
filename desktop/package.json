@@ -50,6 +50,9 @@
       "extendInfo": { "LSUIElement": true },
       "notarize": { "teamId": "6X238J3VPJ" }
     },
+    "dmg": {
+      "artifactName": "${productName}-${arch}.${ext}"
+    },
     "win": {
       "target": [{ "target": "nsis", "arch": ["x64"] }]
     },
