@@ -232,10 +232,16 @@ app.whenReady().then(() => {
 
   waitForBackend((ok) => {
     updateTrayMenu(ok ? 'Running' : 'Failed to start');
-    if (!ok) {
+    if (ok) {
+      openStatusWindow();
+    } else {
       dialog.showErrorBox('Local Redactor AI', 'The backend engine failed to start. Please restart the app.');
     }
   });
+});
+
+app.on('activate', () => {
+  openStatusWindow();
 });
 
 app.on('window-all-closed', (e) => {
