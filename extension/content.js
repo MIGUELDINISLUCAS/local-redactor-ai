@@ -326,6 +326,10 @@
     pushProtected(); // final ticked set, before the held send resumes
     answer(review.id, true, text, originals);
     closeOverlay();
+    // Return to the steady-state label so a transient hint (e.g. the "Loaded
+    // <file> — press Send" notice after attaching a document) doesn't linger on
+    // the pill through every later message.
+    setStatus('Reviewing before send', 'ok');
   }
   function finishCancel() {
     if (!activeReview) return;
