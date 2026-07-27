@@ -1,7 +1,8 @@
-const { app, Tray, Menu, nativeImage, BrowserWindow, shell, dialog } = require('electron');
+const { app, Tray, Menu, nativeImage, BrowserWindow, shell, dialog, Notification } = require('electron');
 const path = require('path');
 const http = require('http');
 const fs = require('fs');
+const { autoUpdater } = require('electron-updater');
 
 const isDev = !app.isPackaged;
 const BACKEND_PORT = 3001;
@@ -9,6 +10,8 @@ const BACKEND_ORIGIN = `http://localhost:${BACKEND_PORT}`;
 
 let tray = null;
 let statusWindow = null;
+let updateAvailable = false;
+let updateDownloaded = false;
 
 // ── Backend lifecycle ──────────────────────────────────────────────
 
@@ -100,6 +103,13 @@ function updateTrayMenu(status) {
         app.setLoginItemSettings({ openAtLogin: item.checked });
       },
     },
+    ...(updateDownloaded ? [
+      { type: 'separator' },
+      { label: 'Update ready — install & restart', click: () => autoUpdater.quitAndInstall() },
+    ] : updateAvailable ? [
+      { type: 'separator' },
+      { label: 'Downloading update…', enabled: false },
+    ] : []),
     { type: 'separator' },
     {
       label: 'Quit',
@@ -169,6 +179,40 @@ function openStatusWindow() {
   statusWindow.on('closed', () => { statusWindow = null; });
 }
 
+// ── Auto-updater ──────────────────────────────────────────────────
+
+function setupAutoUpdater() {
+  if (isDev) return;
+
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on('update-available', () => {
+    updateAvailable = true;
+    updateTrayMenu('Running');
+  });
+
+  autoUpdater.on('update-downloaded', () => {
+    updateDownloaded = true;
+    updateTrayMenu('Running');
+    if (Notification.isSupported()) {
+      const n = new Notification({
+        title: 'Local Redactor AI',
+        body: 'A new version has been downloaded. It will be installed when you quit.',
+      });
+      n.on('click', () => autoUpdater.quitAndInstall());
+      n.show();
+    }
+  });
+
+  autoUpdater.on('error', (err) => {
+    console.error('Auto-update error:', err);
+  });
+
+  autoUpdater.checkForUpdates().catch(() => {});
+  setInterval(() => autoUpdater.checkForUpdates().catch(() => {}), 4 * 60 * 60 * 1000);
+}
+
 // ── App lifecycle ──────────────────────────────────────────────────
 
 // Hide dock icon on macOS — tray-only
@@ -179,6 +223,7 @@ if (process.platform === 'darwin') {
 app.whenReady().then(() => {
   createTray();
   startBackend();
+  setupAutoUpdater();
 
   // Auto-start at login (packaged builds only)
   if (!isDev) {

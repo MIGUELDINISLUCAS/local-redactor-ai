@@ -133,6 +133,7 @@ export default function LandingPage() {
           </div>
           <div className="download-cards">
             <article className="download-card">
+              <span className="download-step">1</span>
               <div className="download-card-icon"><Icon name="download" size={22} /></div>
               <h3>Desktop app</h3>
               <p>Install once and it runs quietly in the background. Keeps your data private on your machine.</p>
@@ -143,6 +144,7 @@ export default function LandingPage() {
               <p className="download-note">Windows: if SmartScreen says "Windows protected your PC", click More info → Run anyway.</p>
             </article>
             <article className="download-card">
+              <span className="download-step">2</span>
               <div className="download-card-icon"><Icon name="scan" size={22} /></div>
               <h3>Browser extension</h3>
               <p>Works on Chrome and Edge. Reviews your prompts and restores responses — all on your device.</p>

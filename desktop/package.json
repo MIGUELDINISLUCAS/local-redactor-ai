@@ -10,6 +10,9 @@
     "build": "npm run build --prefix ../backend && electron-builder",
     "pack": "npm run build --prefix ../backend && electron-builder --dir"
   },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
+  },
   "devDependencies": {
     "electron": "^31.0.0",
     "electron-builder": "^24.13.3"
@@ -17,6 +20,11 @@
   "build": {
     "appId": "ai.localredactor.app",
     "productName": "Local Redactor AI",
+    "publish": {
+      "provider": "github",
+      "owner": "MIGUELDINISLUCAS",
+      "repo": "local-redactor-ai"
+    },
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -33,7 +41,10 @@
     ],
     "mac": {
       "category": "public.app-category.productivity",
-      "target": [{ "target": "dmg", "arch": ["arm64"] }],
+      "target": [
+        { "target": "dmg", "arch": ["arm64"] },
+        { "target": "zip", "arch": ["arm64"] }
+      ],
       "hardenedRuntime": true,
       "identity": "Miguel Lucas (6X238J3VPJ)",
       "extendInfo": { "LSUIElement": true },
