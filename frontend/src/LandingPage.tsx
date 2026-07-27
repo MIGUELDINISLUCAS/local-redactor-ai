@@ -132,14 +132,14 @@ export default function LandingPage() {
           <div className="download-intro">
             <div className="eyebrow dark"><span className="eyebrow-dot" /> Get started</div>
             <h2>Two steps to<br /><em>complete privacy.</em></h2>
-            <p>Install the desktop app and add the browser extension. That's it — free for 30 days.</p>
+            <p>Install the local engine and add the browser extension. That's it — free for 30 days.</p>
           </div>
           <div className="download-cards">
             <article className="download-card">
               <span className="download-step">1</span>
               <div className="download-card-icon"><Icon name="download" size={22} /></div>
-              <h3>Desktop app</h3>
-              <p>Install once and it runs quietly in the background. Keeps your data private on your machine.</p>
+              <h3>Local engine</h3>
+              <p>Install once and it runs quietly in the background. Powers the extension and keeps your data private on your machine.</p>
               <div className="download-links">
                 <a className="download-btn" href={MAC_DMG}>Mac (Apple Silicon) <small>.dmg · 299 MB</small></a>
                 <a className="download-btn" href={WIN_EXE}>Windows <small>.exe · 231 MB</small></a>
