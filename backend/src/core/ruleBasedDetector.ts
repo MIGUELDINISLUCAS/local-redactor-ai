@@ -77,10 +77,13 @@ const RULES: Array<[DetectionCategory, RegExp]> = [
   // "driving licence number COLLN920104ME6PQ" (UK DVLA is 16 alphanumerics);
   // kept generic because licence formats vary by country.
   ['PII',          /(?<=\b(?:driving licence|driving license|driver'?s licence|driver'?s license|carta de conduç(?:ão|ao))\b[^\n]{0,25}?)\b[A-Z0-9]{8,20}\b/gi],
-  // UK National Insurance number: 2 letters + 6 digits + a final A–D, usually
-  // spaced ("QQ 74 18 29 D"). Distinctive enough to match unanchored; PHONE
-  // previously grabbed only the middle digits, leaking the "QQ … D" around them.
-  ['TAX_ID',       /\b[A-Z]{2}\s?\d{2}\s?\d{2}\s?\d{2}\s?[A-D]\b/g],
+  // UK National Insurance number: 2 letters + 6 digits + a trailing letter,
+  // usually spaced ("QQ 74 18 29 D"). Officially the suffix is A–D, but we accept
+  // any A–Z (and treat the suffix as optional): users paste imperfect data, and
+  // for a privacy tool it's far safer to over-redact an NI-shaped token than to
+  // let the greedy PHONE rule grab the middle digits and leak the "QQ … F" around
+  // them. The 2-2-2 digit grouping keeps this distinctive enough to stay unanchored.
+  ['TAX_ID',       /\b[A-Z]{2}\s?\d{2}\s?\d{2}\s?\d{2}(?:\s?[A-Z])?\b/g],
   // Curated Portuguese institutions / funders / banks the NER model tends to miss.
   ...institutionRules(),
   // Curated city/town names → LOCATION. Covers STANDALONE places ("nasceu em

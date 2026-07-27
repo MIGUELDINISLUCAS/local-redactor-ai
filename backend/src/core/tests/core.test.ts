@@ -29,6 +29,18 @@ describe('detectEntities', () => {
     expect(results.some((e) => e.originalValue === uuid)).toBe(true);
   });
 
+  it('captures a UK National Insurance number whole, even with a non-standard suffix', () => {
+    // "QQ 19 38 57 F" — suffix F is not an official A–D suffix, but the tool must
+    // still redact the whole token rather than let PHONE grab only "19 38 57"
+    // (which would leak "QQ … F"). Regression for the demo mis-categorisation.
+    const results = detectEntities('national insurance number QQ 19 38 57 F.');
+    const ni = results.find((e) => e.originalValue === 'QQ 19 38 57 F');
+    expect(ni).toBeDefined();
+    expect(ni?.category).toBe('TAX_ID');
+    // And the greedy PHONE rule must not also emit the middle digits on their own.
+    expect(results.some((e) => e.category === 'PHONE' && e.originalValue.includes('19 38 57'))).toBe(false);
+  });
+
   it('returns nothing for empty or whitespace input without throwing', () => {
     expect(detectEntities('')).toEqual([]);
     expect(detectEntities('   \n  ')).toEqual([]);
