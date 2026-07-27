@@ -21,6 +21,8 @@ const steps = [
   { number: '03', icon: 'restore' as IconName, title: 'Restore locally', copy: 'The reply comes back with your original details restored on your device.' },
 ];
 const CHROME_STORE_URL = 'https://chromewebstore.google.com/detail/local-redactor-ai-%E2%80%94-priva/dppllhhednkmbcchgldbbnaedfaidgpj';
+const MAC_DMG = 'https://github.com/MIGUELDINISLUCAS/local-redactor-ai/releases/latest/download/Local.Redactor.AI-0.1.0-arm64.dmg';
+const WIN_EXE = 'https://github.com/MIGUELDINISLUCAS/local-redactor-ai/releases/latest/download/Local.Redactor.AI.Setup.0.1.0.exe';
 
 export default function LandingPage() {
   return (
@@ -35,7 +37,7 @@ export default function LandingPage() {
           <a href="#download">Download</a>
           <a href="#compliance">Compliance</a>
           <a href="#privacy">Privacy</a>
-          <a className="nav-cta" href={CHROME_STORE_URL} target="_blank" rel="noopener">Add to Chrome / Edge <Icon name="arrow" size={15} /></a>
+          <a className="nav-cta" href="#download">Download <Icon name="arrow" size={15} /></a>
         </nav>
       </header>
 
@@ -46,8 +48,7 @@ export default function LandingPage() {
             <h1>Make your next prompt<br /><span>private.</span></h1>
             <p className="hero-lede">Local Redactor AI removes sensitive details from useful prompts before they travel. Review everything, send with confidence, and keep your sensitive information on your device.</p>
             <div className="hero-actions">
-              <a className="primary-cta" href={CHROME_STORE_URL} target="_blank" rel="noopener">Add to Chrome / Edge — 30-day free trial <Icon name="arrow" size={17} /></a>
-              <a className="secondary-cta" href="#download">Download desktop app <Icon name="download" size={15} /></a>
+              <a className="primary-cta" href="#download">Download — 30-day free trial <Icon name="arrow" size={17} /></a>
               <a className="text-cta" href="#how-it-works">See how it works <span>↓</span></a>
             </div>
             <div className="hero-note"><Icon name="lock" size={14} /> Your original text never leaves your device.</div>
@@ -128,23 +129,24 @@ export default function LandingPage() {
           <div className="download-intro">
             <div className="eyebrow dark"><span className="eyebrow-dot" /> Get started</div>
             <h2>Two steps to<br /><em>complete privacy.</em></h2>
-            <p>Install the desktop app (runs the detection engine locally) and add the browser extension. That's it.</p>
+            <p>Install the desktop app and add the browser extension. That's it — free for 30 days.</p>
           </div>
           <div className="download-cards">
             <article className="download-card">
               <div className="download-card-icon"><Icon name="download" size={22} /></div>
               <h3>Desktop app</h3>
-              <p>Runs the local detection engine in your menu bar. No terminal needed.</p>
+              <p>Install once and it runs quietly in the background. Keeps your data private on your machine.</p>
               <div className="download-links">
-                <a className="download-btn" href="https://github.com/migueldlucas/local-redactor-ai/releases/latest/download/Local-Redactor-AI-0.1.0-arm64.dmg">Mac (Apple Silicon) <small>.dmg · 303 MB</small></a>
-                <a className="download-btn" href="https://github.com/migueldlucas/local-redactor-ai/releases/latest/download/Local-Redactor-AI-Setup-0.1.0.exe">Windows <small>.exe · 231 MB</small></a>
+                <a className="download-btn" href={MAC_DMG}>Mac (Apple Silicon) <small>.dmg · 303 MB</small></a>
+                <a className="download-btn" href={WIN_EXE}>Windows <small>.exe · 231 MB</small></a>
               </div>
+              <p className="download-note">Windows: if SmartScreen says "Windows protected your PC", click More info → Run anyway.</p>
             </article>
             <article className="download-card">
               <div className="download-card-icon"><Icon name="scan" size={22} /></div>
               <h3>Browser extension</h3>
-              <p>Works on Chrome and Edge. Intercepts prompts and restores responses locally.</p>
-              <a className="download-btn primary" href={CHROME_STORE_URL} target="_blank" rel="noopener">Add to Chrome / Edge <small>30-day free trial</small></a>
+              <p>Works on Chrome and Edge. Reviews your prompts and restores responses — all on your device.</p>
+              <a className="download-btn primary" href={CHROME_STORE_URL} target="_blank" rel="noopener">Add to Chrome / Edge</a>
             </article>
           </div>
         </section>

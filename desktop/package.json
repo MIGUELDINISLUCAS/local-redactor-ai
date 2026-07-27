@@ -34,8 +34,10 @@
     "mac": {
       "category": "public.app-category.productivity",
       "target": [{ "target": "dmg", "arch": ["arm64"] }],
-      "hardenedRuntime": false,
-      "extendInfo": { "LSUIElement": true }
+      "hardenedRuntime": true,
+      "identity": "Miguel Lucas (6X238J3VPJ)",
+      "extendInfo": { "LSUIElement": true },
+      "notarize": { "teamId": "6X238J3VPJ" }
     },
     "win": {
       "target": [{ "target": "nsis", "arch": ["x64"] }]
