@@ -17,6 +17,9 @@
     "electron": "^31.0.0",
     "electron-builder": "^24.13.3"
   },
+  "overrides": {
+    "isbinaryfile": "^6.0.0"
+  },
   "build": {
     "appId": "ai.localredactor.app",
     "productName": "Local Redactor AI",
