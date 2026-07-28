@@ -30,7 +30,7 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # The GLiNER weights (model.onnx, ~1.6GB) are too big for git, so they're
       # hosted as a one-time GitHub release asset (tag: model-assets) and fetched
@@ -46,7 +46,7 @@ jobs:
             "https://github.com/${{ github.repository }}/releases/download/model-assets/model.onnx"
           echo "308d687c1bf41676a59edee57957a9a67e400c2ef453957733ff42d1ba48c281  $dest" | sha256sum -c -
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
           cache: 'npm'
@@ -79,7 +79,7 @@ jobs:
       # For manual/test runs (no tag): expose the .exe as a downloadable artifact.
       - name: Upload installer artifact
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: windows-installer
           path: |
