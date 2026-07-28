@@ -1,1 +1,7 @@
-models/
+# Model weights (*.onnx) are too big for git — present locally for dev and for
+# local macOS builds, and fetched from a GitHub release asset in CI (see
+# .github/workflows/release-windows.yml). The small tokenizer/config JSON files
+# ARE tracked so CI has everything except the weights.
+models/**/*.onnx
+# The older, unused gliner/ export (superseded by gliner-pii-large).
+models/gliner/

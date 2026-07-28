@@ -21,6 +21,13 @@ function startBackend() {
   process.env.PORT = String(BACKEND_PORT);
   process.env.NODE_ENV = 'production';
 
+  // Point the GLiNER engine at the model bundled under Resources/ (extraResources).
+  // Without this the backend looks in process.cwd()/models — which isn't the app
+  // bundle — and silently falls back to regex-only detection.
+  const modelDir = path.join(process.resourcesPath, 'models', 'gliner-pii-large');
+  process.env.GLINER_MODEL_DIR = modelDir;
+  process.env.GLINER_MODEL_PATH = path.join(modelDir, 'model.onnx');
+
   const entry = path.join(process.resourcesPath, 'backend', 'index.js');
   try {
     require(entry);

@@ -38,7 +38,8 @@
       { "from": "../backend/node_modules", "to": "backend/node_modules" },
       { "from": "../backend/package.json", "to": "backend/package.json" },
       { "from": "build/trayTemplate.png", "to": "trayTemplate.png" },
-      { "from": "build/icon.ico", "to": "icon.ico" }
+      { "from": "build/icon.ico", "to": "icon.ico" },
+      { "from": "../backend/models/gliner-pii-large", "to": "models/gliner-pii-large" }
     ],
     "mac": {
       "category": "public.app-category.productivity",

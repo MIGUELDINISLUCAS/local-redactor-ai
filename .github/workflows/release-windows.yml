@@ -32,6 +32,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The GLiNER weights (model.onnx, ~1.6GB) are too big for git, so they're
+      # hosted as a one-time GitHub release asset (tag: model-assets) and fetched
+      # here into the model dir the small tokenizer/config files already live in.
+      # electron-builder then bundles the whole dir via extraResources.
+      - name: Fetch GLiNER model weights
+        shell: bash
+        run: |
+          set -euo pipefail
+          dest="backend/models/gliner-pii-large/model.onnx"
+          mkdir -p "$(dirname "$dest")"
+          curl -L --fail --retry 3 -o "$dest" \
+            "https://github.com/${{ github.repository }}/releases/download/model-assets/model.onnx"
+          echo "308d687c1bf41676a59edee57957a9a67e400c2ef453957733ff42d1ba48c281  $dest" | sha256sum -c -
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
