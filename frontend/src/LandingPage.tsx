@@ -141,9 +141,10 @@ export default function LandingPage() {
               <h3>Local engine</h3>
               <p>Install once and it runs quietly in the background. Powers the extension and keeps your data private on your machine.</p>
               <div className="download-links">
-                <a className="download-btn" href={MAC_DMG}>Mac (Apple Silicon) <small>.dmg · 293 MB</small></a>
+                <a className="download-btn" href={MAC_DMG}>Mac (Apple Silicon) <small>.dmg · 1.8 GB</small></a>
                 <a className="download-btn" href={WIN_EXE}>Windows <small>.exe · 1.7 GB</small></a>
               </div>
+              <p className="download-note">Large because the AI detection model is included — so it runs entirely offline, with nothing to download later.</p>
               <p className="download-note">Windows: if SmartScreen says "Windows protected your PC", click More info → Run anyway.</p>
             </article>
             <article className="download-card">
