@@ -160,6 +160,7 @@ async function init() {
     const licenseKicker = document.getElementById('licenseKicker');
     const licenseLabel = document.getElementById('licenseLabel');
     const trialMsg = document.getElementById('trialMsg');
+    const licenseOffline = document.getElementById('licenseOffline');
 
     if (status && status.ok && status.licensed) {
       const t = status.licenseType === 'perpetual' ? 'Perpetual' : status.licenseType === 'subscription' ? 'Subscription' : 'Extended trial';
@@ -172,6 +173,13 @@ async function init() {
       licenseKicker.textContent = `Trial — ${status.trial.daysLeft} day${status.trial.daysLeft === 1 ? '' : 's'} left`;
       licenseTrial.style.display = '';
       licenseInput.style.display = '';
+    } else if (!status || !status.ok) {
+      // The engine is unreachable, so we know NOTHING about the trial. Say that
+      // — don't fall through to "Trial ended", which reads as a demand for
+      // payment when the real problem is that the app isn't running.
+      licenseKicker.textContent = 'Engine not running';
+      licenseOffline.style.display = '';
+      licenseInput.style.display = 'none';
     } else {
       licenseKicker.textContent = 'Trial ended';
       licenseExpired.style.display = '';
@@ -190,7 +198,15 @@ async function init() {
     if (res && res.ok) {
       location.reload();
     } else {
-      errEl.textContent = res && res.error === 'key-expired' ? 'This key has expired.' : 'Invalid license key.';
+      // "backend-unreachable" is not a bad key — the engine just isn't running.
+      // Reporting it as "Invalid license key" sends people chasing the wrong problem.
+      const err = res && res.error;
+      errEl.textContent =
+        err === 'backend-unreachable'
+          ? 'Local engine not running — open the Local Redactor app, then try again.'
+          : err === 'key-expired'
+            ? 'This key has expired.'
+            : 'Invalid license key.';
       errEl.style.display = '';
     }
   });
