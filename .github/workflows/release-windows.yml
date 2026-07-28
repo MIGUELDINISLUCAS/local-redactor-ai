@@ -1,0 +1,74 @@
+name: Build Windows installer
+
+# Builds the Windows (x64) desktop installer on a native Windows runner, so the
+# per-platform native modules (onnxruntime-node, sharp) resolve correctly — a
+# cross-build from macOS cannot do this reliably.
+#
+# Trigger:
+#   • push a tag like v0.1.2  → builds AND publishes the .exe + latest.yml to
+#     that tag's GitHub Release (electron-updater's Windows auto-update feed).
+#   • manual "Run workflow"   → builds only, uploads the .exe as a run artifact
+#     for testing (no release is touched).
+#
+# The macOS DMG is still built locally (it needs your Apple Developer ID +
+# notarization credentials); this workflow only adds the Windows artifacts to
+# the same release.
+#
+# NOTE: the Windows installer is UNSIGNED (no code-signing cert configured), so
+# SmartScreen will warn on first run. Add a cert + signing secrets later to fix.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write        # needed to create/update the GitHub Release on tag builds
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            desktop/package-lock.json
+
+      # Backend deps FIRST — on the Windows runner this pulls the win32-x64
+      # native binaries (onnxruntime-node, @img/sharp-win32-x64) that get copied
+      # into the app via electron-builder's extraResources.
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Build backend (tsc + copy vendor assets)
+        working-directory: backend
+        run: npm run build
+
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm ci
+
+      # --publish always on a tag (pushes to the Release); never otherwise.
+      - name: Build Windows installer
+        working-directory: desktop
+        run: npx electron-builder --win --publish ${{ startsWith(github.ref, 'refs/tags/') && 'always' || 'never' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # For manual/test runs (no tag): expose the .exe as a downloadable artifact.
+      - name: Upload installer artifact
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: |
+            desktop/release/*.exe
+            desktop/release/latest.yml
+          if-no-files-found: error

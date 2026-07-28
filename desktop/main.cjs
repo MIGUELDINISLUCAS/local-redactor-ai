@@ -43,10 +43,13 @@ function waitForBackend(done, tries = 0) {
 // ── Tray ───────────────────────────────────────────────────────────
 
 function buildTrayIcon() {
-  // Use a template image (works with macOS dark/light menu bar)
+  // macOS: a monochrome template image that auto-adapts to the light/dark menu
+  // bar. Windows: that template renders invisibly on the taskbar tray, so use
+  // the coloured app icon (.ico) instead.
+  const iconFile = process.platform === 'win32' ? 'icon.ico' : 'trayTemplate.png';
   const iconPath = isDev
-    ? path.join(__dirname, 'build', 'trayTemplate.png')
-    : path.join(process.resourcesPath, 'trayTemplate.png');
+    ? path.join(__dirname, 'build', iconFile)
+    : path.join(process.resourcesPath, iconFile);
 
   if (fs.existsSync(iconPath)) {
     return nativeImage.createFromPath(iconPath);

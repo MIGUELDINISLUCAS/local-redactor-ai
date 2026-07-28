@@ -37,7 +37,8 @@
       { "from": "../backend/dist", "to": "backend" },
       { "from": "../backend/node_modules", "to": "backend/node_modules" },
       { "from": "../backend/package.json", "to": "backend/package.json" },
-      { "from": "build/trayTemplate.png", "to": "trayTemplate.png" }
+      { "from": "build/trayTemplate.png", "to": "trayTemplate.png" },
+      { "from": "build/icon.ico", "to": "icon.ico" }
     ],
     "mac": {
       "category": "public.app-category.productivity",
@@ -54,7 +55,16 @@
       "artifactName": "${productName}-${arch}.${ext}"
     },
     "win": {
+      "icon": "build/icon.ico",
       "target": [{ "target": "nsis", "arch": ["x64"] }]
+    },
+    "nsis": {
+      "artifactName": "${productName}-Setup.${ext}",
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     },
     "linux": {
       "target": ["AppImage"],

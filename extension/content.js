@@ -645,7 +645,7 @@
     if (on) {
       const h = await bg({ type: 'health' });
       if (h && h.error === 'context-invalidated') setStatus('Extension updated — refresh tab (⌘R)', 'warn');
-      else if (!h || !h.ok) setStatus('⚠ Protection engine not running — double-click setup.command to repair it', 'warn');
+      else if (!h || !h.ok) setStatus('⚠ Protection engine not running — open the Local Redactor app to start it', 'warn');
       else setStatus('Reviewing before send', 'ok');
     } else {
       setStatus('', '');
