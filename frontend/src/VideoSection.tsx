@@ -47,11 +47,6 @@ export default function VideoSection() {
           </button>
         )}
       </div>
-
-      <p className="video-note">
-        <span className="video-note-dot" />
-        Nothing is requested from YouTube until you press play.
-      </p>
     </section>
   );
 }

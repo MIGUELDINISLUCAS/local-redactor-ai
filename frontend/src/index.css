@@ -214,8 +214,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .video-poster:hover .video-scrim { background: linear-gradient(180deg, rgba(14,11,28,.06), rgba(14,11,28,.34)); }
 .video-poster:hover .video-play { transform: translate(-50%, -50%) scale(1.06); background: var(--purple-dark); }
 .video-poster:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; }
-.video-note { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 15px 0 0; color: #9792aa; font-size: 11px; }
-.video-note-dot { width: 6px; height: 6px; border-radius: 50%; background: #54c9a3; box-shadow: 0 0 0 3px #e4f7f0; }
 @media (max-width: 680px) { .video-section { padding: 10px 0 64px; } .video-frame { border-radius: 13px; } .video-play { width: 58px; height: 58px; } .video-play svg { width: 21px; height: 21px; } }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
