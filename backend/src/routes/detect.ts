@@ -3,6 +3,7 @@ import { upload } from '../middleware/upload';
 import { parseFile } from '../parsers/parseFile';
 import { detectAll } from '../core/detect';
 import { isOllamaAvailable, thoroughModelInstalled, glinerModelReady } from '../core/nerDetector';
+import { glinerLoadError } from '../core/glinerEngine';
 import { createRegistry, registerEntities, getAllMappings, seedRegistry } from '../core/placeholderRegistry';
 import { applyContextDefaults } from '../core/contextTerms';
 import { anonymiseText } from '../core/anonymise';
@@ -15,13 +16,26 @@ export const detectRouter = Router();
 // inside detectAll → detectWithNer; routes just forward the flag.
 
 // GET /api/ner-status — which detection engines are available?
-//  - fast:     the bundled in-process GLiNER model (the product's default)
-//  - thorough: the OPTIONAL self-installed Ollama model (may be absent)
+//  - fast:      the bundled in-process GLiNER model (the product's default)
+//  - thorough:  the OPTIONAL self-installed Ollama model (may be absent)
 //  - available: legacy field — true if fast detection can run at all
+//  - loadError: why the model failed to load, when it did
+//
+// `fast` reports whether the model can actually be USED, not merely that the
+// file is on disk: a model that is present but fails to load reported fast:true
+// while detection silently ran regex-only, which made that failure very hard to
+// diagnose. loadError carries the reason so the UI can show it.
 detectRouter.get('/ner-status', async (_req: Request, res: Response) => {
-  const fast = glinerModelReady();
+  const loadError = glinerLoadError();
+  const fast = glinerModelReady() && !loadError;
   const thorough = await thoroughModelInstalled();
-  res.json({ available: fast || (await isOllamaAvailable()), fast, thorough });
+  res.json({
+    available: fast || (await isOllamaAvailable()),
+    fast,
+    thorough,
+    modelPresent: glinerModelReady(),
+    ...(loadError ? { loadError } : {}),
+  });
 });
 
 // POST /api/process — detect + anonymise in one call, continuing from prior

@@ -167,6 +167,15 @@ const CAT: Record<string, DetectionCategory> = {
 const esmImport: (specifier: string) => Promise<any> =
   new Function('s', 'return import(s)') as (s: string) => Promise<any>;
 
+// Why the model failed to load, if it did. A failure here is invisible to the
+// user — detectWithNer catches it and quietly falls back to regex — so we keep
+// the reason and expose it via /api/ner-status. Diagnosing the ERR_REQUIRE_ESM
+// failure otherwise took a terminal session on the affected machine.
+let lastLoadError: string | null = null;
+export function glinerLoadError(): string | null {
+  return lastLoadError;
+}
+
 let modelPromise: Promise<any> | null = null;
 async function getModel(): Promise<any> {
   if (!modelPromise) {
@@ -190,8 +199,16 @@ async function getModel(): Promise<any> {
       });
       await g.initialize();
       console.log(`✓ GLiNER token-level model loaded (${path.basename(MODEL_DIR)}).`);
+      lastLoadError = null;
       return g;
-    })();
+    })().catch((e: unknown) => {
+      lastLoadError = e instanceof Error ? e.message : String(e);
+      // Clear the cached rejection so a later request can retry (a failure can
+      // be transient — e.g. memory pressure — and shouldn't be permanent until
+      // the app restarts).
+      modelPromise = null;
+      throw e;
+    });
   }
   return modelPromise;
 }
