@@ -14,6 +14,7 @@ function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
 
 import InteractiveDemo from './InteractiveDemo';
 import ComplianceSection from './ComplianceSection';
+import VideoSection from './VideoSection';
 
 const steps = [
   { number: '01', icon: 'scan' as IconName, title: 'Detect on-device', copy: 'Emails, names, addresses and more are found before anything leaves your screen.' },
@@ -36,6 +37,7 @@ export default function LandingPage() {
           <span>Local Redactor <em>AI</em></span>
         </a>
         <nav className="landing-links" aria-label="Main navigation">
+          <a href="#demo">Demo</a>
           <a href="#how-it-works">How it works</a>
           <a href="#download">Download</a>
           <a href="#compliance">Compliance</a>
@@ -82,6 +84,8 @@ export default function LandingPage() {
           <div><strong>100%</strong><span>reviewable before sending</span></div>
           <div><strong>Local</strong><span>responses restored on your device</span></div>
         </section>
+
+        <VideoSection />
 
         <section id="how-it-works" className="section-block process-section">
           <div className="section-intro"><div className="eyebrow dark"><span className="eyebrow-dot" /> Built for your browser</div><h2>Private by default,<br /><em>right where you work.</em></h2><p>Local Redactor is a browser extension for Chrome and Edge that currently works with ChatGPT and Claude. It detects sensitive details locally, lets you review them, and restores the result on your device.</p><div className="browser-note"><span className="browser-note-dot" /> Chrome &amp; Edge <i /> ChatGPT <i /> Claude</div></div>
