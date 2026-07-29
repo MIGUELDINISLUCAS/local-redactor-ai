@@ -177,13 +177,30 @@ function openStatusWindow() {
   <p class="sub">Backend engine running on localhost:${BACKEND_PORT}</p>
   <div class="status" id="s"><span class="dot loading"></span>Checking…</div>
   <p><a href="https://chromewebstore.google.com/detail/local-redactor-ai-%E2%80%94-priva/dppllhhednkmbcchgldbbnaedfaidgpj" target="_blank">Get the browser extension →</a></p>
-  <script>
-    fetch('http://localhost:${BACKEND_PORT}/health')
-      .then(r=>r.json())
-      .then(()=>{document.getElementById('s').innerHTML='<span class="dot ok"></span>Backend is running'})
-      .catch(()=>{document.getElementById('s').innerHTML='<span class="dot err"></span>Backend is not responding'});
-  </script>
 </body></html>`)}`;
+
+  // The health check runs in the MAIN process, not the page. This window is a
+  // data: URL, so its origin is "null" — the backend's CORS allow-list rejects
+  // that (correctly), which used to make the dashboard report "not responding"
+  // even when the engine was healthy.
+  const renderStatus = (ok) => {
+    if (!statusWindow || statusWindow.isDestroyed()) return;
+    const cls = ok ? 'ok' : 'err';
+    const msg = ok ? 'Backend is running' : 'Backend is not responding';
+    statusWindow.webContents
+      .executeJavaScript(
+        `document.getElementById('s').innerHTML='<span class="dot ${cls}"></span>${msg}'`
+      )
+      .catch(() => {});
+  };
+
+  statusWindow.webContents.once('did-finish-load', () => {
+    const req = http.get(`${BACKEND_ORIGIN}/health`, (res) => {
+      res.resume();
+      renderStatus(res.statusCode === 200);
+    });
+    req.on('error', () => renderStatus(false));
+  });
 
   statusWindow.loadURL(html);
   statusWindow.on('closed', () => { statusWindow = null; });

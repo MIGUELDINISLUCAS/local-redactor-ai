@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import { pathToFileURL } from 'url';
 import { DetectionCategory } from './types';
 
 // GLiNER zero-shot NER via onnxruntime-node (in-process, no Ollama, no LLM).
@@ -155,17 +156,27 @@ const CAT: Record<string, DetectionCategory> = {
   'date of birth': 'DATE',
 };
 
+// Both the vendored gliner build and @xenova/transformers are ESM-only. We
+// compile to CommonJS, and TypeScript rewrites a plain `await import()` into
+// require() — which cannot load ESM on the Node 20 that Electron bundles, so
+// the packaged app failed with ERR_REQUIRE_ESM and silently fell back to regex
+// (it only worked in dev because newer standalone Node allows require(esm)).
+// Building the import via Function keeps it a real dynamic import after
+// compilation. Specifiers are absolute file:// URLs so relative paths — and
+// Windows backslashes/spaces — resolve correctly.
+const esmImport: (specifier: string) => Promise<any> =
+  new Function('s', 'return import(s)') as (s: string) => Promise<any>;
+
 let modelPromise: Promise<any> | null = null;
 async function getModel(): Promise<any> {
   if (!modelPromise) {
     modelPromise = (async () => {
-      // Dynamic import so onnxruntime-node only loads when this engine is used.
-      // @ts-ignore — vendored ESM module, no type declarations.
-      const { Gliner } = await import('../vendor/gliner/gliner.mjs');
+      // Imported lazily so onnxruntime-node only loads when this engine is used.
+      const glinerUrl = pathToFileURL(path.join(__dirname, '..', 'vendor', 'gliner', 'gliner.mjs')).href;
+      const { Gliner } = await esmImport(glinerUrl);
       // Load the tokenizer from the local model dir — NO network call to the HF
       // hub (privacy: nothing leaves the device, works fully offline).
-      // @ts-ignore — no type declarations for @xenova env.
-      const { env } = await import('@xenova/transformers');
+      const { env } = await esmImport(pathToFileURL(require.resolve('@xenova/transformers')).href);
       env.localModelPath = path.dirname(MODEL_DIR);
       const g = new Gliner({
         tokenizerPath: TOKENIZER,
