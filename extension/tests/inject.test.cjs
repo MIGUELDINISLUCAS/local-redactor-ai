@@ -78,3 +78,60 @@ test('rewrites current object-part and singular-message payloads and blocks unkn
   );
   assert.equal(sent.length, 5, 'unknown final-send shape must not reach the network');
 });
+
+// A long message can arrive split across several text parts. The whole message
+// is folded into the first part, so the leftover parts must be REMOVED — blanking
+// them left `{type:'text', text:''}` entries in the payload, which the provider
+// can reject, so the anonymised message never actually sent.
+test('folds multi-part messages into one part and drops the emptied parts', async () => {
+  const sent = [];
+  let messageHandler;
+  const page = {
+    fetch: async (input, init) => { sent.push({ input, init }); return { ok: true }; },
+    addEventListener: (type, fn) => { if (type === 'message') messageHandler = fn; },
+    postMessage: (data) => {
+      if (data.type !== 'review-request') return;
+      queueMicrotask(() => messageHandler({
+        source: page,
+        data: { __lra: 1, type: 'review-response', id: data.id, approved: true, text: 'SAFE TEXT' },
+      }));
+    },
+    XMLHttpRequest: undefined,
+  };
+  global.window = page;
+  Object.defineProperty(global, 'navigator', { configurable: true, value: { sendBeacon: null } });
+  delete require.cache[require.resolve('../inject.js')];
+  require('../inject.js');
+  messageHandler({ source: page, data: { __lra: 1, type: 'protect-state', on: true } });
+
+  // Object-style parts (current ChatGPT schema), plus a non-text part to preserve.
+  await page.fetch('https://chatgpt.com/backend-api/f/conversation', {
+    method: 'POST',
+    body: JSON.stringify({
+      messages: [{
+        author: { role: 'user' },
+        content: {
+          parts: [
+            { content_type: 'text', text: 'first chunk' },
+            { content_type: 'text', text: 'second chunk' },
+            { content_type: 'image_asset_pointer', asset_pointer: 'file-123' },
+          ],
+        },
+      }],
+    }),
+  });
+
+  const parts = JSON.parse(sent[0].init.body).messages[0].content.parts;
+  const textParts = parts.filter((p) => p && typeof p.text === 'string');
+  assert.equal(textParts.length, 1, 'emptied text parts must be dropped, not blanked');
+  assert.equal(textParts[0].text, 'SAFE TEXT');
+  assert.ok(
+    parts.some((p) => p && p.content_type === 'image_asset_pointer'),
+    'non-text parts must be preserved'
+  );
+  assert.equal(
+    parts.some((p) => p && typeof p.text === 'string' && p.text === ''),
+    false,
+    'no empty text part may survive in the payload'
+  );
+});

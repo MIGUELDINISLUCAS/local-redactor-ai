@@ -224,13 +224,21 @@
           const text = parts.map(textFromPart).filter((p) => typeof p === 'string').join('\n');
           return {
             text,
+            // The whole message is folded into the FIRST text part, so the extra
+            // text parts must be dropped — not blanked. Emptying them left
+            // `{type:'text', text:''}` entries behind (the old filter only removed
+            // empty *strings*, never emptied objects), and a payload carrying
+            // empty text parts can be rejected by the provider, so the anonymised
+            // message never actually sent.
             put: (anon) => {
               let placed = false;
-              m.content.parts = parts.map((p) => {
-                if (textFromPart(p) === null) return p;
-                if (!placed) { placed = true; return putPartText(p, anon); }
-                return putPartText(p, '');
-              }).filter((p) => p !== '');
+              m.content.parts = parts
+                .map((p) => {
+                  if (textFromPart(p) === null) return p; // keep images/attachments
+                  if (!placed) { placed = true; return putPartText(p, anon); }
+                  return null; // folded into the first part — drop it
+                })
+                .filter((p) => p !== null && p !== '');
             },
           };
         }
@@ -248,14 +256,15 @@
             const text = textBlocks.map(textFromPart).join('\n');
             return {
               text,
+              // As above: fold all text into the first block and REMOVE the rest,
+              // rather than leaving blanked-out text blocks in the payload.
               put: (anon) => {
                 let placed = false;
-                for (const c of m.content) {
-                  if (textFromPart(c) !== null) {
-                    putPartText(c, placed ? '' : anon);
-                    placed = true;
-                  }
-                }
+                m.content = m.content.filter((c) => {
+                  if (textFromPart(c) === null) return true; // keep non-text blocks
+                  if (!placed) { placed = true; putPartText(c, anon); return true; }
+                  return false;
+                });
               },
             };
           }
