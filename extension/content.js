@@ -77,7 +77,9 @@
     } else if (d.type === 'leak-blocked') {
       if (d.routine) return; // draft/keystroke stream held — expected, no banner
       setStatus(
-        d.reason === 'attachment'
+        d.reason === 'attachment-autofile'
+          ? '🛡️ That message was long enough that ChatGPT uploaded it as a file, which can’t be anonymised — nothing was sent. Send it in smaller parts, or load the document with the 📎 button to anonymise it locally.'
+          : d.reason === 'attachment'
           ? '🛡️ Remove the attached file, then re-add it with the 📎 button — raw upload blocked, nothing sent.'
           : d.reason === 'structure'
             ? '⚠ Send blocked — could not read the message to anonymise it (tell the developer). Nothing sent.'

@@ -78,6 +78,15 @@
   // block: the provider auto-generates a conversation title/rename from its own
   // copy of your original text and ships it separately. We still block these
   // (the title is stored server-side), but quietly — no scary warning.
+  // Provider blob storage. ChatGPT silently converts a long pasted message into
+  // a file attachment and PUTs the raw bytes here. Blocking that is correct —
+  // it carries the ORIGINAL text, which we cannot read to anonymise — but the
+  // user never attached anything, so "remove the attached file" reads as
+  // nonsense. Classified separately to explain what actually happened.
+  function isProviderFileStoreUrl(url) {
+    return /oaiusercontent\.com|\/files\/[^?]*\/raw(?:[?#]|$)/.test(url || '');
+  }
+
   function isExpectedBlockUrl(url) {
     return /\/(gen_title|title|rename)\b/.test(url || '')
       || /\/backend-api\/(files|global\/search)\b/.test(url || '')
@@ -415,7 +424,10 @@
         try { fileUpload = looksBinaryContentType(input.headers && input.headers.get && input.headers.get('content-type')); } catch (e) { /* ignore */ }
       }
       if (fileUpload) {
-        reportLeakBlocked('attachment', { url, value: '(file attachment)' });
+        reportLeakBlocked(isProviderFileStoreUrl(url) ? 'attachment-autofile' : 'attachment', {
+          url,
+          value: '(file attachment)',
+        });
         return Response.error();
       }
     }
@@ -547,7 +559,10 @@
           return;
         }
         if (isFileLikeBody(body)) {
-          reportLeakBlocked('attachment', { url: this.__lra_url || '(xhr)', value: '(file attachment)' });
+          reportLeakBlocked(isProviderFileStoreUrl(this.__lra_url) ? 'attachment-autofile' : 'attachment', {
+            url: this.__lra_url || '(xhr)',
+            value: '(file attachment)',
+          });
           try { this.abort(); } catch (e) { /* ignore */ }
           return;
         }
@@ -572,7 +587,10 @@
           return false;
         }
         if (isFileLikeBody(data)) {
-          reportLeakBlocked('attachment', { url, value: '(file attachment)' });
+          reportLeakBlocked(isProviderFileStoreUrl(url) ? 'attachment-autofile' : 'attachment', {
+            url,
+            value: '(file attachment)',
+          });
           return false;
         }
         const leak = typeof data === 'string' ? bodyLeaks(data) : null;
