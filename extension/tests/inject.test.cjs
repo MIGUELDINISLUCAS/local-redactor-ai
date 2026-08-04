@@ -135,3 +135,44 @@ test('folds multi-part messages into one part and drops the emptied parts', asyn
     'no empty text part may survive in the payload'
   );
 });
+
+// An opaque provider file upload is normally refused. The one exception is a
+// message we already anonymised: the composer still holds exactly the reviewed
+// text, so the bytes going up are the anonymised ones.
+test('allows a provider auto-file upload only while the composer is vetted', async () => {
+  const sent = [];
+  let messageHandler;
+  const page = {
+    fetch: async (input, init) => { sent.push({ input, init }); return { ok: true }; },
+    addEventListener: (type, fn) => { if (type === 'message') messageHandler = fn; },
+    postMessage: () => {},
+    XMLHttpRequest: undefined,
+  };
+  global.window = page;
+  Object.defineProperty(global, 'navigator', { configurable: true, value: { sendBeacon: null } });
+  delete require.cache[require.resolve('../inject.js')];
+  require('../inject.js');
+  messageHandler({ source: page, data: { __lra: 1, type: 'protect-state', on: true } });
+
+  const AUTOFILE = 'https://sdmntprwestus3.oaiusercontent.com/files/abc-123/raw?se=2026-08-04&sp=w&sig=zz';
+  const USER_FILE = 'https://chatgpt.com/backend-api/files/upload';
+  const body = () => new ArrayBuffer(16);
+
+  // 1. Not vetted -> the auto-file upload must be refused.
+  await page.fetch(AUTOFILE, { method: 'PUT', body: body() });
+  assert.equal(sent.length, 0, 'unvetted auto-file upload must not reach the network');
+
+  // 2. Vetted -> the same upload is allowed through.
+  messageHandler({ source: page, data: { __lra: 1, type: 'composer-vetted', vetted: true } });
+  await page.fetch(AUTOFILE, { method: 'PUT', body: body() });
+  assert.equal(sent.length, 1, 'vetted auto-file upload should be allowed');
+
+  // 3. Vetted must NOT wave through a genuine user attachment elsewhere.
+  await page.fetch(USER_FILE, { method: 'POST', body: body() });
+  assert.equal(sent.length, 1, 'a real file attachment stays blocked even when vetted');
+
+  // 4. Editing the composer clears the vetting, so uploads are refused again.
+  messageHandler({ source: page, data: { __lra: 1, type: 'composer-vetted', vetted: false } });
+  await page.fetch(AUTOFILE, { method: 'PUT', body: body() });
+  assert.equal(sent.length, 1, 'editing the composer must re-block the upload');
+});

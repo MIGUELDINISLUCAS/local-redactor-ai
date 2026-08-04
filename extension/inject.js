@@ -28,6 +28,7 @@
   let protectedValues = new Set(); // values the user chose to anonymise in the active review
   let protectedMap = Object.create(null); // original value -> placeholder (for send-time scrub)
   let preparedReview = null; // short-lived approval from ChatGPT's /conversation/prepare
+  let composerVetted = false; // composer holds exactly the text approved in a document review
 
   // ---- talk to the isolated content script ----
   window.addEventListener('message', (e) => {
@@ -36,6 +37,11 @@
     if (!d || d.__lra !== 1) return;
     if (d.type === 'protect-state') {
       protectOn = !!d.on;
+    } else if (d.type === 'composer-vetted') {
+      // True only while the composer holds exactly the text the user approved in
+      // a document review. It is the sole condition under which we let an opaque
+      // provider file upload through (see the attachment firewall below).
+      composerVetted = !!d.vetted;
     } else if (d.type === 'protected-values') {
       // REPLACE (not accumulate): reflects the user's current ticked choices, so
       // unticking a value immediately stops the firewall guarding it.
@@ -424,6 +430,15 @@
         try { fileUpload = looksBinaryContentType(input.headers && input.headers.get && input.headers.get('content-type')); } catch (e) { /* ignore */ }
       }
       if (fileUpload) {
+        // The provider auto-uploading a message we already anonymised is the one
+        // safe case: the composer still holds exactly the reviewed text, so the
+        // bytes going up are the anonymised ones. Any edit clears composerVetted.
+        if (isProviderFileStoreUrl(url) && composerVetted) {
+          try {
+            console.debug(`[Local Redactor] allowed anonymised document upload → ${url}`);
+          } catch (e) { /* ignore */ }
+          return origFetch.apply(this, [input, init]);
+        }
         reportLeakBlocked(isProviderFileStoreUrl(url) ? 'attachment-autofile' : 'attachment', {
           url,
           value: '(file attachment)',

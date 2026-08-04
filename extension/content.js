@@ -65,6 +65,47 @@
   }
   function pushProtected() { toPage({ type: 'protected-values', list: currentProtected(), map: currentProtectedMap() }); }
 
+  // ---- vetted composer ------------------------------------------------------
+  // Past a certain length the provider stops sending the message inline and
+  // uploads it as an opaque file, which the firewall cannot read and therefore
+  // refuses — that is why long documents never sent. The one case where such an
+  // upload is provably safe is when the composer still holds EXACTLY the text we
+  // anonymised and inserted ourselves. We assert that positively rather than
+  // checking for the absence of known values: text typed straight into the
+  // composer was never detected, so "no known value present" would happily wave
+  // through PII we had simply never seen.
+  let anonymisedInsert = null; // exact text we put in the composer after review
+
+  function composerText() {
+    const c = findComposer();
+    if (!c) return '';
+    return (c.tagName === 'TEXTAREA' ? c.value : c.innerText) || '';
+  }
+  let vettedExpiry = null;
+  function pushComposerVetted() {
+    if (anonymisedInsert === null) { toPage({ type: 'composer-vetted', vetted: false }); return; }
+    const cur = composerText().trim();
+    if (cur === '') {
+      // The composer empties the instant a send starts, and the provider's file
+      // upload follows right after. Treating "empty" as an edit would revoke the
+      // vetting a beat before the upload we mean to allow, so hold it briefly
+      // and then drop it rather than leaving it asserted indefinitely.
+      clearTimeout(vettedExpiry);
+      vettedExpiry = setTimeout(() => {
+        anonymisedInsert = null;
+        toPage({ type: 'composer-vetted', vetted: false });
+      }, 60000);
+      return;
+    }
+    clearTimeout(vettedExpiry);
+    toPage({ type: 'composer-vetted', vetted: cur === anonymisedInsert.trim() });
+  }
+  // Sent synchronously on every edit: a debounce would leave a window where the
+  // page still believes edited text is vetted.
+  document.addEventListener('input', () => {
+    if (anonymisedInsert !== null) pushComposerVetted();
+  }, true);
+
   window.addEventListener('message', (e) => {
     if (e.source !== window) return;
     const d = e.data;
@@ -319,6 +360,26 @@
 
   function closeOverlay() { overlay.style.display = 'none'; activeReview = null; }
 
+  // Put document text into the composer. `vetted` records that this exact text
+  // came out of a review, which is what lets the firewall allow an opaque
+  // auto-file upload of it later.
+  async function insertDocument(text, vetted) {
+    const composer = findComposer();
+    if (!composer) { setStatus('Open a chat first, then load a document', 'warn'); return; }
+    if (await insertIntoComposer(composer, text)) {
+      anonymisedInsert = vetted ? text : null;
+      pushComposerVetted();
+      setStatus(
+        vetted ? 'Document anonymised — check it, then press Send' : 'Document inserted unchanged — press Send',
+        vetted ? 'ok' : 'warn'
+      );
+    } else {
+      let copied = false;
+      try { await navigator.clipboard.writeText(text); copied = true; } catch (e) { /* ignore */ }
+      setStatus(copied ? "Couldn't auto-insert — paste (⌘V) it, then Send" : "Couldn't load into the message box", 'warn');
+    }
+  }
+
   function finishApprove() {
     if (!activeReview) return;
     const review = activeReview;
@@ -326,6 +387,12 @@
     // Pass the originals so the page hook can block the send if any survived.
     const originals = review.entities.filter((e) => e.include).map((e) => e.originalValue);
     pushProtected(); // final ticked set, before the held send resumes
+    if (review.mode === 'document') {
+      // No request is being held — the anonymised text goes into the composer.
+      closeOverlay();
+      void insertDocument(text, true);
+      return;
+    }
     answer(review.id, true, text, originals);
     closeOverlay();
     // Return to the steady-state label so a transient hint (e.g. the "Loaded
@@ -335,15 +402,23 @@
   }
   function finishCancel() {
     if (!activeReview) return;
-    answer(activeReview.id, false);
+    const isDoc = activeReview.mode === 'document';
+    if (!isDoc) answer(activeReview.id, false); // a document review holds no request
     closeOverlay();
-    setStatus('Send cancelled — nothing was sent', 'warn');
+    setStatus(isDoc ? 'Document discarded — nothing was inserted' : 'Send cancelled — nothing was sent', 'warn');
   }
   // Explicit bypass: send the original text as typed. Clear the active firewall
   // values first so the deliberately unredacted request is not blocked.
   function finishSendOriginal() {
     if (!activeReview) return;
     const review = activeReview;
+    if (review.mode === 'document') {
+      // Explicit opt-out: insert the document unchanged. It is NOT vetted, so an
+      // opaque auto-file upload of it still gets refused.
+      closeOverlay();
+      void insertDocument(review.originalText, false);
+      return;
+    }
     toPage({ type: 'protected-values', list: [], map: {} });
     answer(review.id, true, review.originalText, []);
     closeOverlay();
@@ -605,16 +680,13 @@
       const existing = ((composer.tagName === 'TEXTAREA' ? composer.value : composer.innerText) || '').trim();
       const combined = existing ? `${existing}\n\n${res.text}` : res.text;
 
-      if (await insertIntoComposer(composer, combined)) {
-        setStatus(existing
-          ? `Added “${f.name}” to your message — press Send to review & anonymise`
-          : `Loaded “${f.name}” — press Send to review & anonymise`, 'ok');
-      } else {
-        // Last resort only: editor wouldn't accept the insert.
-        let copied = false;
-        try { await navigator.clipboard.writeText(res.text); copied = true; } catch (e) { /* ignore */ }
-        setStatus(copied ? "Couldn't auto-insert — paste (⌘V) to add it, then Send" : "Couldn't load into the message box", 'warn');
-      }
+      // Anonymise BEFORE the text lands in the composer, rather than waiting for
+      // Send. A document is usually long enough that the provider converts the
+      // message into an opaque file upload, which the firewall cannot read and so
+      // refuses — meaning a send-time review never got the chance to rewrite it.
+      // Reviewing up front means whatever leaves is already anonymised.
+      setStatus(`Anonymising “${f.name}”…`);
+      openReview('document', null, combined);
     } catch (e) {
       setStatus("Couldn't read that file", 'warn');
     }
