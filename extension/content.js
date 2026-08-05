@@ -151,13 +151,25 @@
   }
 
   // ---- restoration: placeholders -> originals in the page ----
+  // Restoration is for text the provider sent BACK to us. It must never touch an
+  // editable area: the composer legitimately holds placeholders once a document
+  // has been anonymised into it, and rewriting those to the originals would put
+  // the real values straight back into the message about to be sent.
+  function isInEditable(node) {
+    for (let el = node.parentElement; el; el = el.parentElement) {
+      if (el.isContentEditable) return true;
+      const tag = el.tagName;
+      if (tag === 'TEXTAREA' || tag === 'INPUT') return true;
+    }
+    return false;
+  }
   function restore(root) {
     if (!Object.keys(mapping).length) return;
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     const nodes = [];
     while (walker.nextNode()) {
       const n = walker.currentNode;
-      if (n.nodeValue && PLACEHOLDER_TEST_RE.test(n.nodeValue)) nodes.push(n);
+      if (n.nodeValue && PLACEHOLDER_TEST_RE.test(n.nodeValue) && !isInEditable(n)) nodes.push(n);
     }
     for (const n of nodes) n.nodeValue = n.nodeValue.replace(PLACEHOLDER_RE, (ph) => mapping[ph] ?? ph);
   }
