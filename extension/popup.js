@@ -181,7 +181,9 @@ async function init() {
       licenseOffline.style.display = '';
       licenseInput.style.display = 'none';
     } else {
-      licenseKicker.textContent = 'Trial ended';
+      // Unlicensed (or a legacy backend whose built-in trial ran out) — same
+      // remedy either way: activate a key or buy a subscription.
+      licenseKicker.textContent = 'License required';
       licenseExpired.style.display = '';
       licenseInput.style.display = '';
     }

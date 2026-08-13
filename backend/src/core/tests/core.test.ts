@@ -4,6 +4,8 @@ import { chunkForNer, nerWindows } from '../nerDetector';
 import { glinerWindows } from '../glinerEngine';
 import { isContextualPlace, applyContextDefaults } from '../contextTerms';
 import { createRegistry, registerEntities, getOrCreatePlaceholder } from '../placeholderRegistry';
+import { verifyKey, usableHere, machineId } from '../license';
+import crypto from 'crypto';
 import { anonymiseText } from '../anonymise';
 import { restoreText } from '../restore';
 import { parseFile } from '../../parsers/parseFile';
@@ -313,5 +315,44 @@ describe('restoreText', () => {
     const result = restoreText('', registry);
     expect(result.restoredText).toBe('');
     expect(result.warnings).toHaveLength(0);
+  });
+});
+
+describe('license machine binding', () => {
+  // A throwaway keypair whose PUBLIC key does NOT match the embedded one —
+  // proves foreign signatures are rejected. For accepted-path tests we sign
+  // with the real private key only if present on this machine (dev box);
+  // otherwise those cases are skipped.
+  const b64url = (b: Buffer) => b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  function signWith(privPem: string, payload: object): string {
+    const buf = Buffer.from(JSON.stringify(payload), 'utf-8');
+    const key = crypto.createPrivateKey({ key: privPem, format: 'pem' });
+    return `${b64url(buf)}.${b64url(crypto.sign(null, buf, key))}`;
+  }
+
+  it('rejects keys signed by a different keypair', () => {
+    const { privateKey } = crypto.generateKeyPairSync('ed25519');
+    const forged = signWith(
+      privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
+      { v: 2, type: 'perpetual', issued_at: new Date().toISOString(), email_hash: 'x', order_id: 'F', expires_at: null }
+    );
+    expect(verifyKey(forged)).toBeNull();
+  });
+
+  it('machineId is stable and hex', () => {
+    expect(machineId()).toBe(machineId());
+    expect(machineId()).toMatch(/^[a-f0-9]{32}$/);
+  });
+
+  it('usableHere enforces machine binding and expiry', () => {
+    const base = { v: 2, type: 'subscription' as const, issued_at: new Date().toISOString(), email_hash: 'x', order_id: 'T' };
+    const future = new Date(Date.now() + 86400000).toISOString();
+    const past = new Date(Date.now() - 86400000).toISOString();
+    const me = machineId();
+    expect(usableHere({ ...base, expires_at: future, machine_id: me }, me)).toBe(true);
+    expect(usableHere({ ...base, expires_at: future, machine_id: 'f'.repeat(32) }, me)).toBe(false);
+    expect(usableHere({ ...base, expires_at: past, machine_id: me }, me)).toBe(false);
+    // Legacy: no machine_id → accepted anywhere (pre-binding beta keys).
+    expect(usableHere({ ...base, expires_at: future }, me)).toBe(true);
   });
 });

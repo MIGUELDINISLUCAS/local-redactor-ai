@@ -53,7 +53,7 @@ export default function LandingPage() {
             <h1>Make your next prompt<br /><span>private.</span></h1>
             <p className="hero-lede">Local Redactor AI removes sensitive details from useful prompts before they travel. Review everything, send with confidence, and keep your sensitive information on your device.</p>
             <div className="hero-actions">
-              <a className="primary-cta" href="#download">Download — 30-day free trial <Icon name="arrow" size={17} /></a>
+              <a className="primary-cta" href="#download">Download now <Icon name="arrow" size={17} /></a>
               <a className="text-cta" href="#how-it-works">See how it works <span>↓</span></a>
             </div>
             <div className="hero-note"><Icon name="lock" size={14} /> Your original text never leaves your device.</div>
@@ -136,7 +136,7 @@ export default function LandingPage() {
           <div className="download-intro">
             <div className="eyebrow dark"><span className="eyebrow-dot" /> Get started</div>
             <h2>Two steps to<br /><em>complete privacy.</em></h2>
-            <p>Install the local engine and add the browser extension. That's it — free for 30 days.</p>
+            <p>Install the local engine and add the browser extension. Then activate your subscription or promo key in the extension.</p>
           </div>
           <div className="download-cards">
             <article className="download-card">
@@ -162,7 +162,7 @@ export default function LandingPage() {
         </section>
 
         <section id="privacy" className="privacy-panel">
-          <div className="privacy-copy"><div className="eyebrow light"><span className="eyebrow-dot" /> Built for sensitive work</div><h2>Keep the details,<br /><em>share only what’s necessary.</em></h2><p>Local Redactor creates temporary placeholders for private details, sends only the anonymised prompt, then restores the answer locally. You can inspect the transformation before every send.</p><a className="panel-link" href={CHROME_STORE_URL} target="_blank" rel="noopener">Add to Chrome / Edge — 30-day free trial <Icon name="arrow" size={16} /></a></div>
+          <div className="privacy-copy"><div className="eyebrow light"><span className="eyebrow-dot" /> Built for sensitive work</div><h2>Keep the details,<br /><em>share only what’s necessary.</em></h2><p>Local Redactor creates temporary placeholders for private details, sends only the anonymised prompt, then restores the answer locally. You can inspect the transformation before every send.</p><a className="panel-link" href={CHROME_STORE_URL} target="_blank" rel="noopener">Add to Chrome / Edge <Icon name="arrow" size={16} /></a></div>
           <div className="privacy-orbit"><div className="orbit-ring ring-one" /><div className="orbit-ring ring-two" /><div className="orbit-core"><Icon name="lock" size={27} /><span>local</span></div><span className="orbit-chip chip-one">original stays here</span><span className="orbit-chip chip-two">only placeholders out</span></div>
         </section>
 

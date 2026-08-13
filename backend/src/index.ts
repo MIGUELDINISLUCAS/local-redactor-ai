@@ -3,8 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { detectRouter } from './routes/detect';
 import { warmUpNer } from './core/nerDetector';
-import { trialStatus } from './core/trial';
-import { accessGuard, fullStatus } from './core/license';
+import { accessGuard, fullStatus, startLicenseRefreshLoop } from './core/license';
 import licenseRouter from './routes/license';
 
 const app = express();
@@ -65,9 +64,9 @@ app.use(
 app.use(express.json({ limit: '10mb' }));
 
 // Status + license activation are always readable (the popup needs them even
-// after the trial expires). /health too. The guard blocks all other /api work
-// once both trial and license are exhausted.
-app.get('/api/trial', (_req, res) => res.json(trialStatus()));
+// when unlicensed). /health too. The guard blocks all other /api work until a
+// license is active. /api/trial stays as a shim for older popups.
+app.get('/api/trial', (_req, res) => res.json(fullStatus().trial));
 app.use('/api', licenseRouter);
 app.get('/health', (_req, res) =>
   res.json({ status: 'ok', privacy: 'local-only', ...fullStatus() })
@@ -86,17 +85,16 @@ if (process.env.SERVE_STATIC === '1' && process.env.FRONTEND_DIST) {
 
 const server = app.listen(PORT, HOST, () => {
   console.log(`Local Redactor AI backend running on http://${HOST}:${PORT}`);
-  console.log('No telemetry. No analytics. No external calls.');
+  console.log('No telemetry. No analytics. Message content never leaves this device.');
   const s = fullStatus();
   if (s.licensed) {
-    console.log(`License: ${s.licenseType}${s.licenseExpiresAt ? ` (expires ${s.licenseExpiresAt.slice(0, 10)})` : ''}`);
+    console.log(`License: ${s.licenseType}${s.machineBound ? ' (machine-bound)' : ''}${s.licenseExpiresAt ? ` — expires ${s.licenseExpiresAt.slice(0, 10)}` : ''}`);
   } else {
-    console.log(
-      s.trial.expired
-        ? '⚠ Trial expired — detection is disabled until a licence is added.'
-        : `Trial: ${s.trial.daysLeft} day(s) left (of ${s.trial.trialDays}).`
-    );
+    console.log('⚠ No license — detection is disabled until a key is activated in the extension popup.');
   }
+  // Subscription licenses re-exchange near expiry (the product's only network
+  // call, carrying the key + machine hash only).
+  startLicenseRefreshLoop();
   // Warm the local NER model in the background (no-op if Ollama is absent).
   void warmUpNer();
 });

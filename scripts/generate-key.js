@@ -43,6 +43,10 @@ const privKey = createPrivateKey({ key: privPem, format: 'pem', type: 'pkcs8' })
 const emailHash = createHash('sha256').update(email.toLowerCase().trim()).digest('hex').slice(0, 8);
 
 const payload = {
+  // v2 = purchase key: the backend exchanges it with the license server for a
+  // machine-bound license at activation. Omit --legacy unless you need a key
+  // that activates fully offline (pre-binding format, not machine-bound).
+  ...(args.includes('--legacy') ? {} : { v: 2 }),
   email_hash: emailHash,
   issued_at: new Date().toISOString(),
   type,

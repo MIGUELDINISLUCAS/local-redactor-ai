@@ -126,8 +126,8 @@ async function anonymise(tabId, text) {
   if (!res.ok) {
     let info = null;
     try { info = await res.json(); } catch (e) { /* ignore */ }
-    if (res.status === 403 && info && info.error === 'trial-expired') {
-      throw new Error('trial-expired');
+    if (res.status === 403 && info && (info.error === 'trial-expired' || info.error === 'license-required')) {
+      throw new Error(info.error);
     }
     throw new Error(`backend ${res.status}`);
   }
