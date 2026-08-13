@@ -229,3 +229,63 @@ async function init() {
 }
 
 init();
+
+// ---- diagnostic report -----------------------------------------------------
+// Assembles a state snapshot for support. Deliberately contains NO user
+// content: no rule patterns, no ignore terms, no mappings, no message text —
+// those hold exactly the data this product exists to protect. Counts and
+// engine/licence state only. Nothing is transmitted; it lands on the clipboard
+// and the user decides where it goes.
+async function buildDiagnosticReport() {
+  const lines = [];
+  const manifest = chrome.runtime.getManifest();
+  lines.push('Local Redactor AI — diagnostic report');
+  lines.push(`generated: ${new Date().toISOString()}`);
+  lines.push(`extension: ${manifest.version}`);
+  lines.push(`browser: ${navigator.userAgent}`);
+
+  const health = await send({ type: 'health' });
+  lines.push(`engine reachable: ${!!(health && health.ok)}`);
+
+  const status = await send({ type: 'get-status' });
+  if (status && status.ok) {
+    lines.push(`licensed: ${!!status.licensed}${status.licensed ? ` (${status.licenseType}, expires ${status.licenseExpiresAt || 'never'})` : ''}`);
+    if (status.trial) {
+      lines.push(`trial: daysLeft=${status.trial.daysLeft} expired=${status.trial.expired} started=${status.trial.startedAt}`);
+    }
+  } else {
+    lines.push(`status: unavailable (${(status && status.error) || 'no response'})`);
+  }
+
+  const ner = await send({ type: 'ner-status' });
+  if (ner && ner.ok !== false) {
+    lines.push(`detection: fast=${!!ner.fast} thorough=${!!ner.thorough} modelPresent=${ner.modelPresent !== undefined ? !!ner.modelPresent : 'n/a'}`);
+    if (ner.loadError) lines.push(`model load error: ${ner.loadError}`);
+  } else {
+    lines.push('detection: engine unreachable');
+  }
+
+  const rules = await send({ type: 'getRules' });
+  const ignore = await send({ type: 'getIgnore' });
+  lines.push(`saved rules: ${rules && rules.ok ? rules.rules.length : '?'} | not-sensitive terms: ${ignore && ignore.ok ? ignore.ignore.length : '?'}`);
+
+  return lines.join('\n');
+}
+
+document.getElementById('diagBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('diagBtn');
+  const done = document.getElementById('diagDone');
+  btn.disabled = true;
+  try {
+    const report = await buildDiagnosticReport();
+    await navigator.clipboard.writeText(report);
+    done.style.display = '';
+    setTimeout(() => { done.style.display = 'none'; }, 6000);
+  } catch (e) {
+    done.textContent = 'Could not copy — try again';
+    done.style.color = 'var(--red)';
+    done.style.display = '';
+  } finally {
+    btn.disabled = false;
+  }
+});
