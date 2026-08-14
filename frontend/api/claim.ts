@@ -37,7 +37,11 @@ export default async function handler(req: any, res: any) {
     }
 
     const session = await stripeGet(`checkout/sessions/${sessionId}`);
-    if (session.payment_status !== 'paid') {
+    // "no_payment_required" is what Stripe reports for a fully-discounted
+    // checkout (a 100%-off coupon). Those are legitimately completed orders —
+    // requiring "paid" alone would reject every free-code recipient, and make
+    // it impossible to exercise this flow without actually spending money.
+    if (!['paid', 'no_payment_required'].includes(session.payment_status)) {
       const p = page('Payment not completed', `<h1 class="err">Payment not completed</h1><p>This checkout session has not been paid. If you believe this is wrong, contact the developer with your receipt.</p>`, 402);
       res.status(p.status).setHeader('Content-Type', 'text/html').send(p.html);
       return;
