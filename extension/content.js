@@ -534,10 +534,10 @@
     if (!res || !res.ok) {
       // Fail safe: never send the original. Give an accurate reason.
       const err = (res && res.error) || 'unknown';
-      if (err === 'license-required') {
-        elNote.textContent = 'A license is needed — nothing was sent. Enter your key in the extension popup, or buy one there.';
-      } else if (err === 'trial-expired') {
-        elNote.textContent = 'Your trial has ended — nothing was sent. Enter a license key in the extension popup, or buy one to continue.';
+      // 'trial-expired' only comes from an older engine that still had the
+      // built-in trial; the remedy is identical, so both say the same thing.
+      if (err === 'license-required' || err === 'trial-expired') {
+        elNote.textContent = 'A license is needed — nothing was sent. Enter your key in the extension popup, or subscribe there.';
       } else if (err === 'context-invalidated') {
         elNote.textContent = 'Extension was updated — refresh this tab (⌘R), then resend';
       } else if (/failed to fetch|networkerror|backend|ECONNREFUSED/i.test(err)) {

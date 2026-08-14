@@ -1,16 +1,7 @@
-import { useEffect, useState } from 'react';
 import LandingPage from './LandingPage';
-import SetupGuide from './SetupGuide';
 
+// The site is a single page. The old hash router also served a post-purchase
+// setup guide, which the license server's claim page replaced.
 export default function App() {
-  const [route, setRoute] = useState(() => window.location.hash);
-
-  useEffect(() => {
-    const onHashChange = () => setRoute(window.location.hash);
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
-  }, []);
-
-  if (route === '#setup') return <SetupGuide />;
   return <LandingPage />;
 }

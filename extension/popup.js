@@ -163,7 +163,7 @@ async function init() {
     const licenseOffline = document.getElementById('licenseOffline');
 
     if (status && status.ok && status.licensed) {
-      const t = status.licenseType === 'perpetual' ? 'Perpetual' : status.licenseType === 'subscription' ? 'Subscription' : 'Extended trial';
+      const t = status.licenseType === 'perpetual' ? 'Perpetual' : status.licenseType === 'subscription' ? 'Subscription' : 'Promo key';
       licenseLabel.textContent = `Active — ${t}`;
       licenseKicker.textContent = 'Licensed';
       licenseActive.style.display = '';
