@@ -295,3 +295,37 @@ document.getElementById('diagBtn').addEventListener('click', async () => {
     btn.disabled = false;
   }
 });
+
+// Opening the user's own mail client (rather than posting the report anywhere)
+// keeps the promise that this extension transmits nothing: they see the whole
+// report in the draft and decide whether to send it.
+const SUPPORT_EMAIL = 'localredactor@gmail.com';
+
+document.getElementById('diagMailBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('diagMailBtn');
+  const done = document.getElementById('diagDone');
+  btn.disabled = true;
+  try {
+    const report = await buildDiagnosticReport();
+    const body = `Hi,\n\nSomething isn't working. Details below.\n\nWhat I was doing:\n\n\n--- diagnostic report ---\n${report}\n`;
+    const url = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Local Redactor AI — problem report')}&body=${encodeURIComponent(body)}`;
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    // Also copy it, so the report isn't lost if no mail client is configured.
+    try { await navigator.clipboard.writeText(report); } catch (e) { /* ignore */ }
+    done.textContent = '✓ Draft opened (and copied, in case no mail app is set up).';
+    done.style.display = '';
+    setTimeout(() => { done.style.display = 'none'; }, 8000);
+  } catch (e) {
+    done.textContent = 'Could not open your mail app — use “Copy it instead”.';
+    done.style.color = 'var(--red)';
+    done.style.display = '';
+  } finally {
+    btn.disabled = false;
+  }
+});

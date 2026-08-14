@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Local Redactor AI — Privacy for ChatGPT & Claude",
-  "version": "0.4.28",
+  "version": "0.4.29",
   "description": "Holds your ChatGPT/Claude message for review, anonymises it locally, and only the safe version is sent.",
   "permissions": ["storage", "activeTab"],
   "host_permissions": [
