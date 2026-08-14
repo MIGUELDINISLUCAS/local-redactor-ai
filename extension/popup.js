@@ -168,6 +168,10 @@ async function init() {
       licenseKicker.textContent = 'Licensed';
       licenseActive.style.display = '';
       licenseInput.style.display = 'none';
+      // Cancelling / updating the card is self-serve via Stripe's portal, but
+      // only subscribers have anything to manage there.
+      const manageLink = document.getElementById('manageLink');
+      if (manageLink && status.licenseType === 'subscription') manageLink.style.display = '';
     } else if (status && status.ok && status.trial && !status.trial.expired) {
       trialMsg.textContent = `${status.trial.daysLeft} day${status.trial.daysLeft === 1 ? '' : 's'} left in your free trial.`;
       licenseKicker.textContent = `Trial — ${status.trial.daysLeft} day${status.trial.daysLeft === 1 ? '' : 's'} left`;
