@@ -9,7 +9,7 @@
 // Subscription keys are re-checked against Stripe LIVE here, so a cancelled
 // subscription stops refreshing (the current license simply runs out).
 // Stripe is the only state — this endpoint stores nothing.
-import { signPayload, verifyKey, stripeGet } from './_lib';
+import { signPayload, verifyKey, stripeGet } from './_lib.js';
 
 const GRACE_MS = 3 * 24 * 60 * 60 * 1000; // renewal grace past period end
 

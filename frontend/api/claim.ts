@@ -8,7 +8,7 @@
 // session's own created timestamp and Ed25519 signatures are deterministic),
 // so reloading the page always shows the same key — no storage needed; Stripe
 // is the database.
-import { signPayload, emailHash, stripeGet } from './_lib';
+import { signPayload, emailHash, stripeGet } from './_lib.js';
 
 function page(title: string, body: string, status = 200) {
   return {
