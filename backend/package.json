@@ -1,6 +1,6 @@
 {
   "name": "local-redactor-backend",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "scripts": {
     "dev": "tsx watch src/index.ts",
