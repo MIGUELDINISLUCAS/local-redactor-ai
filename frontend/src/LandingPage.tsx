@@ -176,7 +176,7 @@ export default function LandingPage() {
         </section>
 
       </main>
-      <footer className="landing-footer"><span>© 2026 Local Redactor AI</span><span className="footer-lock"><Icon name="lock" size={13} /> local-first, always</span></footer>
+      <footer className="landing-footer"><span>© 2026 Local Redactor AI</span><span><a href="/privacy.html">Privacy Policy</a></span><span className="footer-lock"><Icon name="lock" size={13} /> local-first, always</span></footer>
     </div>
   );
 }

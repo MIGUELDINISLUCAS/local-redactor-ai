@@ -4,52 +4,175 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy Policy — Local Redactor AI</title>
+<meta name="description" content="How Local Redactor AI handles your data: everything is processed on your device, and your message content is never transmitted.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
-body { max-width: 640px; margin: 40px auto; padding: 0 20px; font-family: Inter, ui-sans-serif, -apple-system, sans-serif; color: #171525; line-height: 1.7; }
-h1 { font-size: 22px; margin-bottom: 4px; }
-h2 { font-size: 16px; margin-top: 28px; }
-.updated { color: #918da3; font-size: 13px; margin-bottom: 28px; }
-p, li { font-size: 14px; }
-ul { padding-left: 20px; }
-a { color: #6d3eea; }
+  :root {
+    --ink: #17152d; --muted: #706c84; --purple: #7352ef; --purple-dark: #4d31bd;
+    --purple-soft: #eeeaff; --line: #e9e5f2; --bg: #fbfaff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased; line-height: 1.65;
+  }
+  a { color: var(--purple-dark); }
+  a:hover { color: var(--purple); }
+
+  header.top {
+    padding: 26px max(24px, calc((100vw - 820px) / 2));
+    background: linear-gradient(130deg, #17152d, #241950 64%, #35246d);
+    color: #fff;
+  }
+  .brand { display: inline-flex; align-items: center; gap: 10px; color: #fff; font-weight: 750; font-size: 15px; text-decoration: none; letter-spacing: -.02em; }
+  .brand em { color: #b9aaff; font-style: normal; }
+  .brand-mark { width: 29px; height: 29px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.2); border-radius: 9px; background: rgba(255,255,255,.12); }
+
+  main { width: min(820px, calc(100% - 48px)); margin: 0 auto; padding: 44px 0 72px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--purple); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 4px rgba(184,170,255,.18); }
+  h1 { margin: 14px 0 6px; font-size: clamp(30px, 4.4vw, 42px); line-height: 1.05; letter-spacing: -.05em; }
+  .updated { margin: 0 0 30px; color: var(--muted); font-size: 13px; }
+
+  .callout { padding: 20px 22px; border: 1px solid #d3c8fb; border-radius: 14px; background: var(--purple-soft); }
+  .callout p { margin: 0; font-size: 15px; font-weight: 600; }
+
+  section { margin-top: 34px; }
+  h2 { margin: 0 0 10px; font-size: 17px; letter-spacing: -.02em; }
+  p { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+  ul { margin: 0 0 12px; padding-left: 20px; color: var(--muted); font-size: 14px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--ink); font-weight: 650; }
+
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 13px; }
+  th, td { padding: 10px 12px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+  th { background: var(--lavender, #f5f2ff); font-weight: 700; font-size: 12px; }
+  td { color: var(--muted); }
+
+  .never { margin-top: 34px; padding: 20px 22px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+  .never h2 { margin-bottom: 8px; }
+  .never ul { margin-bottom: 0; }
+
+  footer { width: min(820px, calc(100% - 48px)); margin: 0 auto; padding: 0 0 40px; color: #9792aa; font-size: 12px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  @media (max-width: 600px) { table, thead, tbody, th, td, tr { display: block; } th { display: none; } td { border: 0; border-bottom: 1px solid var(--line); padding: 8px 0; } td:first-child { color: var(--ink); font-weight: 650; } }
 </style>
 </head>
 <body>
-<h1>Privacy Policy</h1>
-<p class="updated">Last updated: 21 July 2026</p>
+  <header class="top">
+    <a class="brand" href="https://www.localredactor.xyz">
+      <span class="brand-mark">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d9d1ff" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v2"/></svg>
+      </span>
+      <span>Local Redactor <em>AI</em></span>
+    </a>
+  </header>
 
-<h2>Summary</h2>
-<p>Local Redactor AI processes all data on your device. We do not collect, transmit, store, or have access to any of your data.</p>
+  <main>
+    <div class="eyebrow"><span class="eyebrow-dot"></span> Privacy</div>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: 14 August 2026</p>
 
-<h2>Data processing</h2>
-<p>The extension intercepts your messages to ChatGPT and Claude, anonymises them using a detection engine running locally on your computer, and lets you review the result before sending. All processing happens entirely on your device:</p>
-<ul>
-<li>Your original text never leaves your device.</li>
-<li>Anonymisation mappings (the link between placeholders and original values) are stored in your browser's session storage and cleared when you close the tab.</li>
-<li>Saved rules and preferences are stored in your browser's local storage on your device.</li>
-</ul>
+    <div class="callout">
+      <p>Your messages are anonymised on your own computer. The text you write, the documents you load, and the link between placeholders and your real details are never transmitted to us or to anyone else.</p>
+    </div>
 
-<h2>Data collection</h2>
-<p>We collect <strong>no data whatsoever</strong>. Specifically:</p>
-<ul>
-<li>No analytics or telemetry</li>
-<li>No usage tracking</li>
-<li>No error reporting</li>
-<li>No cookies</li>
-<li>No accounts or sign-ups</li>
-<li>No network requests to any server other than your own local backend (localhost)</li>
-</ul>
+    <section>
+      <h2>How your messages are handled</h2>
+      <p>
+        The extension holds your message before it reaches ChatGPT or Claude, detects
+        sensitive details using an AI model running locally on your machine, and lets
+        you review exactly what will be sent. Only the anonymised version is sent to
+        the AI provider. The reply is restored to your real details on your device.
+      </p>
+      <ul>
+        <li><strong>Your original text never leaves your device.</strong></li>
+        <li>The detection model is bundled with the app and runs offline — no text is sent anywhere to be analysed.</li>
+        <li>Placeholder mappings live in your browser's session storage and are cleared when the tab closes.</li>
+        <li>Saved rules and preferences stay in your browser's local storage.</li>
+      </ul>
+    </section>
 
-<h2>Third-party services</h2>
-<p>The extension communicates only with a backend server running on your own computer (localhost:3001). It makes no requests to any external server, API, or cloud service.</p>
+    <section>
+      <h2>When the app does contact a server</h2>
+      <p>
+        The app is offline by default. There are exactly two moments it reaches the
+        network, both about your licence — never about your content:
+      </p>
+      <table>
+        <thead><tr><th>When</th><th>What is sent</th><th>Where</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Activating a licence</td>
+            <td>Your licence key and an anonymous machine identifier (a one-way hash of your computer's name, user name, operating system and processor type)</td>
+            <td>localredactor.xyz</td>
+          </tr>
+          <tr>
+            <td>Renewing a subscription</td>
+            <td>The same two values, re-sent shortly before the licence expires so it can be extended</td>
+            <td>localredactor.xyz</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        No message content, document text, detected values or placeholder mappings are
+        included in these requests. Between them, the app makes no outbound calls at
+        all. The desktop app also checks for updates.
+      </p>
+    </section>
 
-<h2>License keys</h2>
-<p>License keys are validated offline using a cryptographic signature. No activation server is contacted. The key is stored locally on your device.</p>
+    <section>
+      <h2>Licences and payment</h2>
+      <p>
+        Payments are handled entirely by <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe</a>.
+        We never see or store your card details. Your subscription record lives with
+        Stripe; we keep no customer database of our own.
+      </p>
+      <p>
+        Your licence key contains an 8-character one-way hash of your email address —
+        not the address itself — along with the type of licence and its order
+        reference. The licence stored on your computer additionally names the machine
+        it was activated on, so a key cannot be used on unlimited computers.
+      </p>
+    </section>
 
-<h2>Changes to this policy</h2>
-<p>If we change this policy, the updated version will be posted at this URL with a new date.</p>
+    <section>
+      <h2>Diagnostics</h2>
+      <p>
+        There is no automatic error reporting. If you ask for help, the extension can
+        assemble a diagnostic report describing software versions, whether the engine
+        is running, and how many rules you have saved. It contains none of your
+        messages, rules or personal data, and it is never transmitted automatically —
+        it is placed on your clipboard or into an email draft, and only you decide
+        whether to send it.
+      </p>
+    </section>
 
-<h2>Contact</h2>
-<p>Questions? Email <a href="mailto:miguel.lucas9@gmail.com">miguel.lucas9@gmail.com</a>.</p>
+    <div class="never">
+      <h2>What we never do</h2>
+      <ul>
+        <li>No analytics, telemetry or usage tracking</li>
+        <li>No cookies</li>
+        <li>No accounts or sign-ups</li>
+        <li>No transmission of your messages, documents or detected values</li>
+        <li>No selling or sharing of data with third parties</li>
+      </ul>
+    </div>
+
+    <section>
+      <h2>Changes to this policy</h2>
+      <p>If this policy changes, the updated version will be posted at this address with a new date.</p>
+    </section>
+
+    <section>
+      <h2>Contact</h2>
+      <p>Questions about privacy, or about your data? Email <a href="mailto:localredactor@gmail.com">localredactor@gmail.com</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <span>© 2026 Local Redactor AI</span>
+    <span><a href="https://www.localredactor.xyz">localredactor.xyz</a></span>
+  </footer>
 </body>
 </html>
