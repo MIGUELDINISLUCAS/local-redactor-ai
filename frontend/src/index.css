@@ -134,7 +134,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .download-intro h2 { margin: 17px 0 14px; font-size: clamp(33px, 4vw, 48px); line-height: 1.04; letter-spacing: -.055em; }
 .download-intro h2 em { color: var(--purple); font-style: normal; }
 .download-intro p { max-width: 480px; margin: 0 auto; color: var(--muted); font-size: 14px; line-height: 1.65; }
-.download-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 700px; margin: 0 auto; }
+.download-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; max-width: 1000px; margin: 0 auto; }
 .download-card { position: relative; border: 1px solid var(--line); border-radius: 16px; background: #fff; padding: 28px 24px; display: flex; flex-direction: column; gap: 10px; }
 .download-step { position: absolute; top: -12px; left: 20px; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: var(--purple); color: #fff; font-size: 12px; font-weight: 800; line-height: 1; }
 .download-card-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 11px; background: var(--lavender); color: var(--purple); }

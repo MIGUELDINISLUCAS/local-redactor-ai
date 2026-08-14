@@ -21,6 +21,7 @@ const steps = [
   { number: '02', icon: 'eye' as IconName, title: 'Review every match', copy: 'You stay in control. Keep, remove or teach the detector what matters.' },
   { number: '03', icon: 'restore' as IconName, title: 'Restore locally', copy: 'The reply comes back with your original details restored on your device.' },
 ];
+const SUBSCRIBE_URL = 'https://buy.stripe.com/8x25kwf5R06d4AE1uwdIA03';
 const CHROME_STORE_URL = 'https://chromewebstore.google.com/detail/local-redactor-ai-%E2%80%94-priva/dppllhhednkmbcchgldbbnaedfaidgpj';
 // Pinned to the current release. We used /releases/latest/download/ before, but
 // the model-assets prerelease (which hosts the GLiNER weights for CI) makes the
@@ -135,8 +136,8 @@ export default function LandingPage() {
         <section id="download" className="section-block download-section">
           <div className="download-intro">
             <div className="eyebrow dark"><span className="eyebrow-dot" /> Get started</div>
-            <h2>Two steps to<br /><em>complete privacy.</em></h2>
-            <p>Install the local engine and add the browser extension. Then activate your subscription or promo key in the extension.</p>
+            <h2>Three steps to<br /><em>complete privacy.</em></h2>
+            <p>Install the local engine, add the browser extension, and activate your key.</p>
           </div>
           <div className="download-cards">
             <article className="download-card">
@@ -157,6 +158,14 @@ export default function LandingPage() {
               <h3>Browser extension</h3>
               <p>Works on Chrome and Edge. Reviews your prompts and restores responses — all on your device.</p>
               <a className="download-btn primary" href={CHROME_STORE_URL} target="_blank" rel="noopener">Add to Chrome / Edge</a>
+            </article>
+            <article className="download-card">
+              <span className="download-step">3</span>
+              <div className="download-card-icon"><Icon name="lock" size={22} /></div>
+              <h3>Subscribe</h3>
+              <p>Your key arrives the moment you subscribe. Paste it into the extension to activate — it’s tied to your computer, and you can move it whenever you change machines.</p>
+              <a className="download-btn primary" href={SUBSCRIBE_URL} target="_blank" rel="noopener">Subscribe monthly</a>
+              <p className="download-note">Already have a promo key? Skip this and paste it straight into the extension.</p>
             </article>
           </div>
         </section>
