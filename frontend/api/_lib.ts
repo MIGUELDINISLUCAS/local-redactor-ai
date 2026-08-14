@@ -21,8 +21,15 @@ export function b64urlDecode(s: string): Buffer {
 }
 
 function privateKey(): crypto.KeyObject {
-  const pem = process.env.LICENSE_PRIVATE_KEY;
-  if (!pem) throw new Error('LICENSE_PRIVATE_KEY not configured');
+  const raw = process.env.LICENSE_PRIVATE_KEY;
+  if (!raw) throw new Error('LICENSE_PRIVATE_KEY not configured');
+  // Accept the PEM directly OR base64 of it. A PEM is multi-line, and env
+  // plumbing (shells, dashboards, CI) mangles newlines in assorted ways —
+  // base64 is a single line and sidesteps the whole problem. Literal "\n"
+  // escapes are also repaired, since some UIs store them that way.
+  const pem = (raw.includes('BEGIN') ? raw : Buffer.from(raw.trim(), 'base64').toString('utf-8'))
+    .replace(/\\n/g, '\n')
+    .trim();
   return crypto.createPrivateKey({ key: pem, format: 'pem' });
 }
 
