@@ -41,7 +41,6 @@
       {
         "from": "../backend/node_modules",
         "to": "backend/node_modules",
-        "comment": "Ship exactly ONE onnxruntime. @xenova/transformers pulls in its own onnxruntime-node@1.14 alongside the 1.27 GLiNER uses, and both install a file named onnxruntime.dll. Windows resolves loaded DLLs by NAME, so whichever loads second matched its imports against the wrong version and failed with ERROR_INVALID_ORDINAL ('The operating system cannot run %1'), leaving Windows users on regex-only detection. macOS is unaffected because its libraries are versioned (libonnxruntime.1.27.0.dylib). The nested copy is an optionalDependency and we never run inference through transformers — only its tokenizer — so dropping it is safe.",
         "filter": ["**/*", "!@xenova/transformers/node_modules/onnxruntime-node/**"]
       },
       { "from": "../backend/package.json", "to": "backend/package.json" },
