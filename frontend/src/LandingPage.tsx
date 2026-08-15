@@ -26,8 +26,8 @@ const CHROME_STORE_URL = 'https://chromewebstore.google.com/detail/local-redacto
 // Pinned to the current release. We used /releases/latest/download/ before, but
 // the model-assets prerelease (which hosts the GLiNER weights for CI) makes the
 // "latest" redirect unreliable, so pin the tag explicitly and bump per release.
-const MAC_DMG = 'https://github.com/MIGUELDINISLUCAS/local-redactor-ai/releases/download/v0.1.5/Local-Redactor-AI-arm64.dmg';
-const WIN_EXE = 'https://github.com/MIGUELDINISLUCAS/local-redactor-ai/releases/download/v0.1.5/Local-Redactor-AI-Setup.exe';
+const MAC_DMG = 'https://github.com/MIGUELDINISLUCAS/local-redactor-ai/releases/download/v0.1.6/Local-Redactor-AI-arm64.dmg';
+const WIN_EXE = 'https://github.com/MIGUELDINISLUCAS/local-redactor-ai/releases/download/v0.1.6/Local-Redactor-AI-Setup.exe';
 
 export default function LandingPage() {
   return (
@@ -146,10 +146,10 @@ export default function LandingPage() {
               <h3>Local engine</h3>
               <p>Install once and it runs quietly in the background. Powers the extension and keeps your data private on your machine.</p>
               <div className="download-links">
-                <a className="download-btn" href={MAC_DMG}>Mac (Apple Silicon) <small>.dmg · 1.8 GB</small></a>
-                <a className="download-btn" href={WIN_EXE}>Windows <small>.exe · 1.7 GB</small></a>
+                <a className="download-btn" href={MAC_DMG}>Mac (Apple Silicon) <small>.dmg · 230 MB</small></a>
+                <a className="download-btn" href={WIN_EXE}>Windows <small>.exe · 190 MB</small></a>
               </div>
-              <p className="download-note">Large because the AI detection model is included — so it runs entirely offline, with nothing to download later.</p>
+              <p className="download-note">On first launch it downloads the AI model once (~1.6&nbsp;GB), then runs entirely offline.</p>
               <p className="download-note">Windows: if SmartScreen says "Windows protected your PC", click More info → Run anyway.</p>
             </article>
             <article className="download-card">
