@@ -41,7 +41,14 @@
       {
         "from": "../backend/node_modules",
         "to": "backend/node_modules",
-        "filter": ["**/*", "!@xenova/transformers/node_modules/onnxruntime-node/**"]
+        "filter": [
+          "**/*",
+          "!@xenova/transformers/node_modules/onnxruntime-node/**",
+          "!.bin/**",
+          "!typescript/**", "!tsx/**", "!vite/**", "!vitest/**", "!@vitest/**",
+          "!esbuild/**", "!@esbuild/**", "!rollup/**", "!@rollup/**",
+          "!fsevents/**", "!@types/**"
+        ]
       },
       { "from": "../backend/package.json", "to": "backend/package.json" },
       { "from": "build/trayTemplate.png", "to": "trayTemplate.png" },
