@@ -26,8 +26,8 @@ const CHROME_STORE_URL = 'https://chromewebstore.google.com/detail/local-redacto
 // Pinned to the current release. We used /releases/latest/download/ before, but
 // the model-assets prerelease (which hosts the GLiNER weights for CI) makes the
 // "latest" redirect unreliable, so pin the tag explicitly and bump per release.
-const MAC_DMG = 'https://github.com/MIGUELDINISLUCAS/local-redactor-ai/releases/download/v0.1.3/Local-Redactor-AI-arm64.dmg';
-const WIN_EXE = 'https://github.com/MIGUELDINISLUCAS/local-redactor-ai/releases/download/v0.1.3/Local-Redactor-AI-Setup.exe';
+const MAC_DMG = 'https://github.com/MIGUELDINISLUCAS/local-redactor-ai/releases/download/v0.1.5/Local-Redactor-AI-arm64.dmg';
+const WIN_EXE = 'https://github.com/MIGUELDINISLUCAS/local-redactor-ai/releases/download/v0.1.5/Local-Redactor-AI-Setup.exe';
 
 export default function LandingPage() {
   return (
