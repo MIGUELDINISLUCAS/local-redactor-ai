@@ -48,6 +48,7 @@
       { "from": "build/icon.ico", "to": "icon.ico" },
       { "from": "../backend/models/gliner-pii-large", "to": "models/gliner-pii-large", "filter": ["**/*", "!model.onnx"] }
     ],
+    "afterPack": "build/afterPack.cjs",
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
