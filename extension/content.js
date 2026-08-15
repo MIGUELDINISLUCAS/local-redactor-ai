@@ -289,20 +289,48 @@
     return `[CUSTOM_${String(max + 1).padStart(3, '0')}]`;
   }
 
-  // Mirrors the backend: longest values first, replace every occurrence of
-  // included entities. Excluded entities stay in the clear (user's choice).
+  // Finds every match for one entity in the ORIGINAL text (never a previously-
+  // mutated copy), so an entity whose span overlaps another can't have its
+  // characters silently swallowed by an earlier replacement. Whole-token match
+  // for letter/digit-edged values so "ena" isn't spliced out of "penalty";
+  // punctuation-edged values (emails, IBANs...) use a plain match.
+  function matchRanges(text, e) {
+    const esc = e.originalValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const edged = /^[\p{L}\p{N}]/u.test(e.originalValue) && /[\p{L}\p{N}]$/u.test(e.originalValue);
+    const src = edged ? `(?<![\\p{L}\\p{N}])${esc}(?![\\p{L}\\p{N}])` : esc;
+    const re = new RegExp(src, 'gu');
+    const ranges = [];
+    let m;
+    while ((m = re.exec(text))) {
+      ranges.push({ start: m.index, end: m.index + m[0].length, placeholder: e.placeholder });
+      if (m[0].length === 0) re.lastIndex++; // guard against zero-width matches
+    }
+    return ranges;
+  }
+
+  // Mirrors the backend's intent (replace every occurrence of every included
+  // entity) but resolves overlaps itself: every entity's matches are found
+  // against the pristine original text, longer/earlier matches win a conflict,
+  // and the result is built in one pass — so no entity's replacement can ever
+  // be undone by another's. Excluded entities stay in the clear (user's choice).
   function computeAnonymised(text, entities) {
     const active = entities.filter((e) => e.include && e.originalValue);
-    active.sort((a, b) => b.originalValue.length - a.originalValue.length);
-    let out = text;
-    for (const e of active) {
-      const esc = e.originalValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      // Whole-token replace for letter/digit-edged values so "ena" isn't spliced
-      // out of "penalty"; punctuation-edged values use a plain match.
-      const edged = /^[\p{L}\p{N}]/u.test(e.originalValue) && /[\p{L}\p{N}]$/u.test(e.originalValue);
-      const src = edged ? `(?<![\\p{L}\\p{N}])${esc}(?![\\p{L}\\p{N}])` : esc;
-      out = out.replace(new RegExp(src, 'gu'), e.placeholder);
+    let ranges = active.flatMap((e) => matchRanges(text, e));
+    // Longest span first, then earliest start — matches the old "longest values
+    // first" precedence while making the winner deterministic on a tie.
+    ranges.sort((a, b) => (b.end - b.start) - (a.end - a.start) || a.start - b.start);
+    const accepted = [];
+    for (const r of ranges) {
+      if (accepted.some((a) => r.start < a.end && a.start < r.end)) continue; // overlaps a winner
+      accepted.push(r);
     }
+    accepted.sort((a, b) => a.start - b.start);
+    let out = '', cursor = 0;
+    for (const r of accepted) {
+      out += text.slice(cursor, r.start) + r.placeholder;
+      cursor = r.end;
+    }
+    out += text.slice(cursor);
     return out;
   }
 
@@ -352,6 +380,17 @@
     if (!value) { elToolHint.textContent = 'Highlight text in the original box first'; return; }
     if (/^\[[A-Z]+_\d{3}\]$/.test(value)) { elToolHint.textContent = 'Already a placeholder'; return; }
     if (activeReview.entities.some((e) => e.originalValue === value)) { elToolHint.textContent = 'Already in the list'; return; }
+    // The captured selection must be an exact, literal substring of the
+    // original message, or the replace in computeAnonymised() will silently
+    // match nothing and the raw text will go out unredacted. A selection that
+    // starts inside the box can still end up including a stray character or a
+    // sliver of adjacent UI (e.g. a drag that runs past the box's edge) — catch
+    // that here instead of adding a "protected" entity that never actually gets
+    // substituted.
+    if (!activeReview.originalText.includes(value)) {
+      elToolHint.textContent = "Couldn't match that selection to the message — try highlighting again, staying inside the box";
+      return;
+    }
     const ph = placeholderFor(value, activeReview.entities);
     activeReview.entities.push({ id: 'm' + Date.now(), originalValue: value, category: 'CUSTOM', placeholder: ph, include: true, source: 'manual' });
     mapping[ph] = value;

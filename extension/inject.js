@@ -96,7 +96,15 @@
   function isExpectedBlockUrl(url) {
     return /\/(gen_title|title|rename)\b/.test(url || '')
       || /\/backend-api\/(files|global\/search)\b/.test(url || '')
-      || /\/realtime\//.test(url || '');
+      || /\/realtime\//.test(url || '')
+      // ChatGPT's client-event/analytics stream. It carries the provider's own
+      // copy of what you typed, so a protected value showing up here is expected
+      // rather than a failure of ours — and it retries, which turned one send
+      // into a dozen identical alarms. Still BLOCKED (nothing leaves), just
+      // quietly: logged via console.debug instead of banner + console.warn.
+      // Scoped to this path only, so any other endpoint on the same host that
+      // starts carrying protected values still shouts.
+      || /\/ces\//.test(url || '');
   }
 
   function reportLeakBlocked(reason, detail) {

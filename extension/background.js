@@ -112,13 +112,30 @@ async function removeIgnore(value) {
   await chrome.storage.local.set({ 'lra-ignore': list });
 }
 
+// Network-level failure only (server not listening yet, momentarily down for a
+// restart, machine just woke from sleep) — never for an HTTP error response,
+// which fetch() resolves rather than rejects.
+async function fetchWithRetry(url, init, attempts = 3) {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fetch(url, init);
+    } catch (e) {
+      if (i === attempts - 1) throw e;
+      await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+    }
+  }
+}
+
 // Anonymise text, accumulating placeholders for this tab's conversation.
 async function anonymise(tabId, text) {
   const state = await getState(tabId);
   const customRules = await getRules();
   const thorough = await getThorough();
   const ignore = await getIgnore();
-  const res = await fetch(`${BACKEND}/api/process`, {
+  // Retry connection-level failures (same rationale as health(): the backend
+  // restarts itself and a momentary blip during that — or during the first-run
+  // model download — shouldn't surface as a scary "not working" message).
+  const res = await fetchWithRetry(`${BACKEND}/api/process`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text, priorMappings: state.mappings, customRules, thorough, ignore }),
