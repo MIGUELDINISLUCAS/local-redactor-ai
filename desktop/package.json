@@ -47,7 +47,8 @@
           "!.bin/**",
           "!typescript/**", "!tsx/**", "!vite/**", "!vitest/**", "!@vitest/**",
           "!esbuild/**", "!@esbuild/**", "!rollup/**", "!@rollup/**",
-          "!fsevents/**", "!@types/**"
+          "!fsevents/**", "!@types/**",
+          "!pdf-parse/lib/pdf.js/*/web/**", "!pdf-parse/test/**"
         ]
       },
       { "from": "../backend/package.json", "to": "backend/package.json" },
