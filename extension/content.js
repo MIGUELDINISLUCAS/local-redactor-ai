@@ -563,7 +563,17 @@
     // loading), only structured data (emails/phones/IDs) was checked. Warn
     // loudly so the user doesn't assume "0 names" means the message is clean.
     if (res.nerUsed === false) {
-      elNote.textContent = '⚠ Name detection didn’t run (model loading) — only emails/phones/IDs were checked. Cancel and resend to catch names.';
+      // Distinguish "still downloading the model on first run" from "loading",
+      // so a new user doesn't think detection is broken.
+      let msg = '⚠ Name detection didn’t run (model loading) — only emails/phones/IDs were checked. Cancel and resend to catch names.';
+      try {
+        const ns = await bg({ type: 'ner-status' });
+        if (ns && ns.downloading) {
+          const pct = typeof ns.downloadPercent === 'number' ? ` (${ns.downloadPercent}%)` : '';
+          msg = `⚠ First-run AI model still downloading${pct} — only emails/phones/IDs were checked. Names & addresses are caught once it finishes; resend then.`;
+        }
+      } catch (e) { /* keep default */ }
+      elNote.textContent = msg;
       elNote.style.color = '#b45309';
     } else {
       elNote.style.color = '';

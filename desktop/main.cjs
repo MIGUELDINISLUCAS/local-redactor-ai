@@ -21,12 +21,18 @@ function startBackend() {
   process.env.PORT = String(BACKEND_PORT);
   process.env.NODE_ENV = 'production';
 
-  // Point the GLiNER engine at the model bundled under Resources/ (extraResources).
-  // Without this the backend looks in process.cwd()/models — which isn't the app
-  // bundle — and silently falls back to regex-only detection.
-  const modelDir = path.join(process.resourcesPath, 'models', 'gliner-pii-large');
+  // The GLiNER weights (~1.6GB) are NOT bundled — the installer ships small and
+  // the backend downloads the model on first run into a WRITABLE user-data
+  // folder (the app bundle is read-only + code-signed, so the model cannot live
+  // inside it). The small tokenizer/config files ARE bundled under Resources/
+  // and get copied next to the downloaded model.
+  const modelDir = path.join(app.getPath('userData'), 'models', 'gliner-pii-large');
   process.env.GLINER_MODEL_DIR = modelDir;
   process.env.GLINER_MODEL_PATH = path.join(modelDir, 'model.onnx');
+  process.env.GLINER_MODEL_BUNDLED_DIR = path.join(process.resourcesPath, 'models', 'gliner-pii-large');
+  process.env.GLINER_MODEL_URL = 'https://github.com/MIGUELDINISLUCAS/local-redactor-ai/releases/download/model-assets/model.onnx';
+  process.env.GLINER_MODEL_SHA256 = '308d687c1bf41676a59edee57957a9a67e400c2ef453957733ff42d1ba48c281';
+  process.env.GLINER_MODEL_SIZE = '1763443637';
 
   const entry = path.join(process.resourcesPath, 'backend', 'index.js');
   try {

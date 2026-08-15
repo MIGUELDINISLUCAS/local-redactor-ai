@@ -136,6 +136,26 @@ async function init() {
     const status = await send({ type: 'ner-status' });
     thoroughInstalled = !!(status && status.ok && status.thorough);
   } catch (e) { /* ignore */ }
+
+  // First-run model download progress. Poll while the popup is open so the bar
+  // advances; hide it once the model is ready.
+  const modelBox = document.getElementById('modelDownload');
+  async function refreshModelDownload() {
+    let s = null;
+    try { s = await send({ type: 'ner-status' }); } catch (e) { /* ignore */ }
+    if (s && s.downloading) {
+      const pct = typeof s.downloadPercent === 'number' ? s.downloadPercent : 0;
+      document.getElementById('modelPct').textContent = `${pct}%`;
+      document.getElementById('modelBar').style.width = `${pct}%`;
+      modelBox.style.display = '';
+    } else {
+      modelBox.style.display = 'none';
+    }
+    return !!(s && s.downloading);
+  }
+  if (await refreshModelDownload()) {
+    const t = setInterval(async () => { if (!(await refreshModelDownload())) clearInterval(t); }, 1500);
+  }
   function syncThoroughSetup() {
     thoroughSetup.style.display = thoroughEl.checked && !thoroughInstalled ? 'block' : 'none';
   }

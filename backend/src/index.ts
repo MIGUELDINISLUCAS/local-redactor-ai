@@ -2,8 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { detectRouter } from './routes/detect';
-import { warmUpNer } from './core/nerDetector';
+import { warmUpNer, resetGlinerReadyCache } from './core/nerDetector';
 import { accessGuard, fullStatus, startLicenseRefreshLoop } from './core/license';
+import { ensureModel } from './core/modelFetcher';
 import licenseRouter from './routes/license';
 
 const app = express();
@@ -92,11 +93,24 @@ const server = app.listen(PORT, HOST, () => {
   } else {
     console.log('⚠ No license — detection is disabled until a key is activated in the extension popup.');
   }
-  // Subscription licenses re-exchange near expiry (the product's only network
-  // call, carrying the key + machine hash only).
+  // Subscription licenses re-exchange near expiry.
   startLicenseRefreshLoop();
-  // Warm the local NER model in the background (no-op if Ollama is absent).
-  void warmUpNer();
+
+  // Ensure the GLiNER model is present (downloading it on first run if the app
+  // shipped without it), THEN warm it. Runs in the background so the server is
+  // up immediately; detection falls back to regex until the model is ready.
+  void (async () => {
+    const dir = process.env.GLINER_MODEL_DIR ?? path.join(process.cwd(), 'models/gliner-pii-large');
+    await ensureModel({
+      dir,
+      url: process.env.GLINER_MODEL_URL,
+      sha256: process.env.GLINER_MODEL_SHA256,
+      size: Number(process.env.GLINER_MODEL_SIZE) || 0,
+      bundledDir: process.env.GLINER_MODEL_BUNDLED_DIR,
+    });
+    resetGlinerReadyCache(); // the file may have just appeared
+    await warmUpNer();
+  })();
 });
 
 // Fail with a plain-English message instead of a raw stack trace when the port

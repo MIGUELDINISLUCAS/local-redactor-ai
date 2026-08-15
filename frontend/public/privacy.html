@@ -71,7 +71,7 @@
   <main>
     <div class="eyebrow"><span class="eyebrow-dot"></span> Privacy</div>
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: 14 August 2026</p>
+    <p class="updated">Last updated: 15 August 2026</p>
 
     <div class="callout">
       <p>Your messages are anonymised on your own computer. The text you write, the documents you load, and the link between placeholders and your real details are never transmitted to us or to anyone else.</p>
@@ -87,7 +87,7 @@
       </p>
       <ul>
         <li><strong>Your original text never leaves your device.</strong></li>
-        <li>The detection model is bundled with the app and runs offline — no text is sent anywhere to be analysed.</li>
+        <li>The detection model runs offline on your machine — no text is ever sent anywhere to be analysed. The model itself is downloaded once, the first time the app runs (see below).</li>
         <li>Placeholder mappings live in your browser's session storage and are cleared when the tab closes.</li>
         <li>Saved rules and preferences stay in your browser's local storage.</li>
       </ul>
@@ -96,12 +96,17 @@
     <section>
       <h2>When the app does contact a server</h2>
       <p>
-        The app is offline by default. There are exactly two moments it reaches the
-        network, both about your licence — never about your content:
+        The app is offline by default. It reaches the network only in these moments —
+        never to send your content:
       </p>
       <table>
         <thead><tr><th>When</th><th>What is sent</th><th>Where</th></tr></thead>
         <tbody>
+          <tr>
+            <td>First run — downloading the detection model</td>
+            <td>Nothing about you: a plain download request for the model file (about 1.6&nbsp;GB, fetched once and then reused offline)</td>
+            <td>github.com</td>
+          </tr>
           <tr>
             <td>Activating a licence</td>
             <td>Your licence key and an anonymous machine identifier (a one-way hash of your computer's name, user name, operating system and processor type)</td>
@@ -116,8 +121,8 @@
       </table>
       <p>
         No message content, document text, detected values or placeholder mappings are
-        included in these requests. Between them, the app makes no outbound calls at
-        all. The desktop app also checks for updates.
+        included in any of these requests. Aside from them, the app makes no outbound
+        calls at all. The desktop app also checks for updates.
       </p>
     </section>
 

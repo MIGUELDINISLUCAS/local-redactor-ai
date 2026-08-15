@@ -31,6 +31,11 @@ function glinerReady(): boolean {
   }
   return glinerReadyCache;
 }
+// The model may appear after startup (first-run download), so the cached
+// fs.existsSync result must be invalidated once it lands.
+export function resetGlinerReadyCache(): void {
+  glinerReadyCache = null;
+}
 // 'anonymizer-fast' is a local Ollama model built from the Anonymizer GGUF with
 // a corrected template (thinking disabled) — see backend/ollama/anonymizer-fast.Modelfile
 // and the README setup step. ~5x faster than the stock GGUF (no reasoning pass).

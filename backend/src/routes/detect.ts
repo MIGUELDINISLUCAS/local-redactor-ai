@@ -4,6 +4,7 @@ import { parseFile } from '../parsers/parseFile';
 import { detectAll } from '../core/detect';
 import { isOllamaAvailable, thoroughModelInstalled, glinerModelReady } from '../core/nerDetector';
 import { glinerLoadError } from '../core/glinerEngine';
+import { modelStatus } from '../core/modelFetcher';
 import { createRegistry, registerEntities, getAllMappings, seedRegistry } from '../core/placeholderRegistry';
 import { applyContextDefaults } from '../core/contextTerms';
 import { anonymiseText } from '../core/anonymise';
@@ -29,12 +30,21 @@ detectRouter.get('/ner-status', async (_req: Request, res: Response) => {
   const loadError = glinerLoadError();
   const fast = glinerModelReady() && !loadError;
   const thorough = await thoroughModelInstalled();
+  // First-run download progress, so the UI can show "downloading… 47%" instead
+  // of the misleading "name detection didn't run".
+  const m = modelStatus();
+  const downloading = m.phase === 'downloading' || m.phase === 'verifying';
+  const downloadPercent =
+    downloading && m.totalBytes ? Math.floor((m.downloadedBytes / m.totalBytes) * 100) : undefined;
   res.json({
     available: fast || (await isOllamaAvailable()),
     fast,
     thorough,
     modelPresent: glinerModelReady(),
+    downloading,
+    ...(downloadPercent !== undefined ? { downloadPercent } : {}),
     ...(loadError ? { loadError } : {}),
+    ...(m.phase === 'error' && m.error ? { downloadError: m.error } : {}),
   });
 });
 

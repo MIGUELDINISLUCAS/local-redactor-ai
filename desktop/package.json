@@ -1,6 +1,6 @@
 {
   "name": "local-redactor-desktop",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "description": "Local Redactor AI — tray app that runs the backend engine",
   "main": "main.cjs",
@@ -46,7 +46,7 @@
       { "from": "../backend/package.json", "to": "backend/package.json" },
       { "from": "build/trayTemplate.png", "to": "trayTemplate.png" },
       { "from": "build/icon.ico", "to": "icon.ico" },
-      { "from": "../backend/models/gliner-pii-large", "to": "models/gliner-pii-large" }
+      { "from": "../backend/models/gliner-pii-large", "to": "models/gliner-pii-large", "filter": ["**/*", "!model.onnx"] }
     ],
     "mac": {
       "category": "public.app-category.productivity",

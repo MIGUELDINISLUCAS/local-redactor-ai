@@ -274,7 +274,16 @@
             <span class="stat-value" id="mappings">—</span>
           </div>
         </div>
-        <button class="button button-danger" id="clear" type="button">Clear this tab’s mappings</button>
+        <div id="modelDownload" style="display:none;margin-top:10px;padding:10px 12px;border:1px solid #cdbef7;border-radius:11px;background:var(--surface-soft)">
+          <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#4d31bd">
+            <span>Downloading AI model…</span><span id="modelPct">0%</span>
+          </div>
+          <div style="height:6px;margin-top:7px;border-radius:99px;background:#e6ddfb;overflow:hidden">
+            <div id="modelBar" style="height:100%;width:0%;background:var(--purple);transition:width .4s ease"></div>
+          </div>
+          <div style="margin-top:6px;font-size:10px;color:var(--muted)">One-time, ~1.6&nbsp;GB. Names &amp; addresses are detected once it finishes; other details are protected already.</div>
+        </div>
+        <button class="button button-danger" id="clear" type="button" style="margin-top:10px">Clear this tab’s mappings</button>
       </section>
 
       <section class="card" id="licenseCard">
