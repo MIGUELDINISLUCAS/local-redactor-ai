@@ -71,7 +71,7 @@
   <main>
     <div class="eyebrow"><span class="eyebrow-dot"></span> Privacy</div>
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: 15 August 2026</p>
+    <p class="updated">Last updated: 20 August 2026</p>
 
     <div class="callout">
       <p>Your messages are anonymised on your own computer. The text you write, the documents you load, and the link between placeholders and your real details are never transmitted to us or to anyone else.</p>
@@ -83,7 +83,9 @@
         The extension holds your message before it reaches ChatGPT or Claude, detects
         sensitive details using an AI model running locally on your machine, and lets
         you review exactly what will be sent. Only the anonymised version is sent to
-        the AI provider. The reply is restored to your real details on your device.
+        the AI provider. The reply is restored to your real details on your device —
+        with one exception, described under
+        <a href="#connectors">Connectors and app widgets</a> below.
       </p>
       <ul>
         <li><strong>Your original text never leaves your device.</strong></li>
@@ -91,6 +93,28 @@
         <li>Placeholder mappings live in your browser's session storage and are cleared when the tab closes.</li>
         <li>Saved rules and preferences stay in your browser's local storage.</li>
       </ul>
+    </section>
+
+    <section id="connectors">
+      <h2>Connectors and app widgets</h2>
+      <p>
+        ChatGPT and Claude can display interactive cards from connected apps — an
+        email composer, a calendar entry, a file from a connected drive. These are
+        rendered in a separate frame that the extension is not able to read or change.
+      </p>
+      <p>
+        Inside such a card, placeholders are <strong>not</strong> replaced with your real
+        details, and anything the card sends is sent by the provider's own servers rather
+        than by your browser — so the extension can neither anonymise nor block it.
+        Sending from one of these cards is the same as sending directly from the provider.
+      </p>
+      <p>
+        This limit is deliberate rather than an oversight. Restoring your real details
+        inside a card that is about to transmit them would hand the provider exactly the
+        information you are protecting. The extension shows a warning while such a card is
+        on screen — check for any remaining placeholder text, for example
+        <strong>[PERSON_001]</strong>, before you send from one.
+      </p>
     </section>
 
     <section>

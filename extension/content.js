@@ -29,13 +29,31 @@
       }
     });
   }
-  async function refreshMapping() {
-    const res = await bg({ type: 'getMappings' });
-    if (res && res.ok) {
-      mapping = {};
-      for (const m of res.mappings) mapping[m.placeholder] = m.originalValue;
+  // The MV3 service worker is suspended routinely, and waking it can fail
+  // outright ("Could not establish connection. Receiving end does not exist").
+  // Without a retry that single failure leaves `mapping` empty, and restore()
+  // bails on its first line — silently disabling restoration for the WHOLE page
+  // session rather than one reply. Retry like health() and anonymise() do.
+  async function refreshMapping(attempts = 3) {
+    for (let i = 0; i < attempts; i++) {
+      const res = await bg({ type: 'getMappings' });
+      if (res && res.ok) {
+        mapping = {};
+        for (const m of res.mappings) mapping[m.placeholder] = m.originalValue;
+        pushProtected();
+        // Placeholders already on screen won't re-render by themselves — the
+        // observer only fires on FUTURE mutations. Sweep once now that we
+        // finally have something to restore them with.
+        restore(document.body);
+        return true;
+      }
+      // A reloaded extension can't be reached from this page at all; only a tab
+      // refresh cures that, so don't spend retries on it.
+      if (res && res.error === 'context-invalidated') break;
+      if (i < attempts - 1) await new Promise((r) => setTimeout(r, 400 * (i + 1)));
     }
     pushProtected();
+    return false;
   }
 
   // ---- talk to the page hook (MAIN world) ----
@@ -173,10 +191,46 @@
     }
     for (const n of nodes) n.nodeValue = n.nodeValue.replace(PLACEHOLDER_RE, (ph) => mapping[ph] ?? ph);
   }
+
+  // ---- connector / app widgets ---------------------------------------------
+  // Providers render app cards (the email composer, connector results) inside
+  // their own iframe. Content scripts run in the top frame only, and a
+  // TreeWalker never crosses into another document, so restore() cannot reach
+  // that content and placeholders stay raw inside the card.
+  //
+  // We deliberately do NOT inject there to "fix" it. Such a card is an OUTBOUND
+  // composer with its own Send: writing real values into it would either hand
+  // them to the provider's server-side connector — the exact leak this tool
+  // exists to prevent — or, since the card sends from its own state rather than
+  // the DOM, show a restored draft while the recipient still receives the
+  // placeholders. Both are worse than leaving it visibly unrestored. So warn.
+  //
+  // We cannot see inside ANY iframe, so the test is deliberately coarse: a
+  // rendered, card-sized frame. Small/hidden frames (pixels, auth helpers) are
+  // skipped so this doesn't cry wolf on ordinary provider chrome.
+  function connectorWidgetPresent() {
+    for (const f of document.querySelectorAll('iframe')) {
+      if (f.offsetWidth >= 200 && f.offsetHeight >= 100) return true;
+    }
+    return false;
+  }
+  let widgetWarned = false;
+  function checkConnectorWidget() {
+    // Only meaningful while we actually have placeholders that ought to resolve.
+    if (!protectOn || !Object.keys(mapping).length) return;
+    const present = connectorWidgetPresent();
+    if (present && !widgetWarned) {
+      widgetWarned = true;
+      setStatus('⚠ App widgets aren’t restored — check for [PLACEHOLDER] before sending from one', 'warn');
+    } else if (!present) {
+      widgetWarned = false; // re-arm for the next card
+    }
+  }
+
   let restoreTimer = null;
   const observer = new MutationObserver(() => {
     clearTimeout(restoreTimer);
-    restoreTimer = setTimeout(() => restore(document.body), 120);
+    restoreTimer = setTimeout(() => { restore(document.body); checkConnectorWidget(); }, 120);
   });
   observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
