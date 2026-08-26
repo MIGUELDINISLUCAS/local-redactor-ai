@@ -20,6 +20,14 @@
   <key>KeepAlive</key>
   <true/>
 
+  <!-- A service people actively wait on, not a batch chore. Without this,
+       launchd runs it at a reduced QoS class which on Apple Silicon schedules
+       inference onto efficiency cores: measured 126-149s vs 32-35s on the same
+       document (~4x). The nice value reads 0 either way, so it is invisible
+       in ps. -->
+  <key>ProcessType</key>
+  <string>Interactive</string>
+
   <key>StandardOutPath</key>
   <string>/Users/miguel/.local-redactor/backend.log</string>
   <key>StandardErrorPath</key>

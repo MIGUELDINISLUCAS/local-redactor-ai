@@ -33,6 +33,13 @@ cat > "$PLIST" <<EOF
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
   <key>ThrottleInterval</key><integer>5</integer>
+  <!-- A service people actively wait on, not a batch chore. Without this,
+       launchd runs it at a reduced QoS class which on Apple Silicon schedules
+       the ONNX inference onto efficiency cores. Measured back-to-back on one
+       cool machine, same 24k-char document, identical output: 126-149s without
+       this key vs 32-35s with it (~4x). The nice value reads 0 either way, so
+       the difference is invisible in ps. -->
+  <key>ProcessType</key><string>Interactive</string>
   <key>StandardOutPath</key><string>$HOME/.local-redactor/backend.log</string>
   <key>StandardErrorPath</key><string>$HOME/.local-redactor/backend.log</string>
   <key>EnvironmentVariables</key>
