@@ -11,3 +11,13 @@ frontend/public/downloads/*.exe
 # Local artifacts (not part of the repo)
 *.cer
 *.mp4
+
+# Licence keys — NEVER commit. This repo is public: a pushed key is public
+# permanently (history rewrites don't clear GitHub caches or forks), and keys
+# are verified offline, so there is no revocation to fall back on.
+license-*.txt
+*.licence
+*.license-key
+
+# Packaged extension builds — release artifacts, rebuilt from extension/
+local-redactor-extension-*.zip
